@@ -10,11 +10,12 @@ const apiClient = axios.create({
   }
 });
 
-// Interceptor para agregar token en cada petición
+// Interceptor para agregar token/API Key en cada petición
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // Usar el token como API Key en el header
+    config.headers['x-api-key'] = token;
   }
   return config;
 });
@@ -30,7 +31,7 @@ export default {
 
   // Listar empresas
   getEmpresas() {
-    return apiClient.get('/auth/empresas');
+    return apiClient.get('/empresas/list');
   },
 
   // Verificar datos del usuario

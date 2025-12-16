@@ -1,53 +1,55 @@
-import 'dotenv/config.js';
 import express from 'express';
+import http from 'http'; 
 import cors from 'cors';
-import authRoutes from './routes/authRoutes.js';
+/* import comprasRoutes from './routes/compras.routes.js';
+import seguimientoRoutes from './routes/Seguimiento.routes.js';
+import trabajadoresRoutes from './routes/trabajadores.routes.js';
+import vacacionesRoutes from './routes/vacaciones.routes.js';
+import guiassRoutes from './routes/guias.routes.js';
+import cargasRoutes from './routes/cargaTransporte.routes.js'; */
+import authRoutes from './routes/auth.routes.js';
+import { initSocket } from './services/socket.js';
+/* import boletasRoutes from './routes/boletas.routes.js';
+import tareoRoutes from './routes/tareos.routes.js'; */
+import dotenv from "dotenv";
+/* import filePersonalRoutes from './routes/filePersonal.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js'
+import contratosRoutes from './routes/contratos.routes.js';
+import tesoreriaRoutes from './routes/tesoreria.routes.js';
+import almacenRoutes from './routes/almacen.routes.js'; */
+
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
 
-// Middleware
+// Inicializar Socket.io
+initSocket(server);
+
+const host = process.env.API_HOST || 'localhost';
+const port = process.env.API_PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Rutas básicas
-app.get('/', (req, res) => {
-  res.json({
-    mensaje: 'Bienvenido a la API de Préstamos para Transporte',
-    versión: '1.0.0',
-    estado: 'funcionando'
-  });
+// Rutas
+app.use('/api', authRoutes);
+
+/* app.use('/app4/dashboard', dashboardRoutes);
+app.use('/app4/seguimiento', seguimientoRoutes);
+app.use('/app4/compras', comprasRoutes);
+app.use('/app4/vacaciones', vacacionesRoutes);
+app.use('/app4/trabajadores', trabajadoresRoutes);
+app.use('/app4/guias', guiassRoutes);
+app.use('/app4/cargas', cargasRoutes);
+app.use('/app4/boletas', boletasRoutes);
+app.use('/app4/tareos', tareoRoutes);
+app.use('/app4/filePersonal', filePersonalRoutes);
+app.use('/app4/contratos', contratosRoutes); 
+app.use('/app4/tesoreria', tesoreriaRoutes);
+app.use('/app4/almacen', almacenRoutes); */
+
+server.listen(port, host, () => {
+  console.log(`🚀 Servidor corriendo en http://${host}:${port}`);
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({
-    estado: 'OK',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// Rutas de autenticación
-app.use('/api/auth', authRoutes);
-
-// Manejo de rutas no encontradas
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Ruta no encontrada',
-    ruta: req.path
-  });
-});
-
-// Manejo de errores
-app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
-  res.status(err.status || 500).json({
-    error: err.message || 'Error interno del servidor'
-  });
-});
-
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor escuchando en puerto ${PORT}`);
-  console.log(`📍 URL: http://localhost:${PORT}`);
-});
