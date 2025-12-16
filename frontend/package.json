@@ -1,0 +1,19 @@
+{
+  "name": "prestamos-transporte-frontend",
+  "version": "1.0.0",
+  "description": "Frontend para gestión de préstamos de transporte",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.8",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.7"
+  }
+}
