@@ -1,23 +1,9 @@
 <template>
   <div class="dashboard-container">
-    <nav class="navbar">
-      <div class="navbar-brand">
-        <h2>🚗 Préstamos Transporte</h2>
-      </div>
-      <div class="navbar-menu">
-        <div class="user-info">
-          <span>{{ usuario.Nombres }} {{ usuario.Apellidos }}</span>
-          <small>{{ usuario.Rolname }}</small>
-        </div>
-        <button @click="handleLogout" class="btn-logout">
-          Cerrar Sesión
-        </button>
-      </div>
-    </nav>
 
     <div class="dashboard-content">
       <div class="welcome-section">
-        <h1>Bienvenido, {{ usuario.Nombres }}</h1>
+        <h1>Bienvenido, {{ usuario?.Nombres }}</h1>
         <p>Gestiona tus préstamos y pagos desde aquí</p>
       </div>
 
@@ -64,28 +50,28 @@
         <div class="info-grid">
           <div class="info-item">
             <label>ID de Usuario</label>
-            <p>{{ usuario.IdUser }}</p>
+            <p>{{ usuario?.IdUser }}</p>
           </div>
           <div class="info-item">
             <label>Email</label>
-            <p>{{ usuario.Email }}</p>
+            <p>{{ usuario?.Email }}</p>
           </div>
           <div class="info-item">
             <label>Área</label>
-            <p>{{ usuario.Area }}</p>
+            <p>{{ usuario?.Area }}</p>
           </div>
           <div class="info-item">
             <label>Rol</label>
-            <p>{{ usuario.Rolname }}</p>
+            <p>{{ usuario?.Rolname }}</p>
           </div>
           <div class="info-item">
             <label>Empresa</label>
-            <p>{{ usuario.EmpresaName }}</p>
+            <p>{{ usuario?.EmpresaName }}</p>
           </div>
           <div class="info-item">
             <label>Permisos Logística</label>
-            <p :class="usuario.HasPermisoLogistica ? 'status-active' : 'status-inactive'">
-              {{ usuario.HasPermisoLogistica ? 'Sí' : 'No' }}
+            <p :class="usuario?.HasPermisoLogistica ? 'status-active' : 'status-inactive'">
+              {{ usuario?.HasPermisoLogistica ? 'Sí' : 'No' }}
             </p>
           </div>
         </div>
@@ -94,36 +80,16 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Dashboard',
-  props: {
-    usuario: {
-      type: Object,
-      required: true
-    }
-  },
-  emits: ['logout'],
-  setup(props, { emit }) {
-    const handleLogout = () => {
-      emit('logout')
-    }
+<script setup>
+import { onMounted, ref } from 'vue'
 
-    const formatDate = (date) => {
-      if (!date) return 'N/A'
-      return new Date(date).toLocaleDateString('es-PE', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      })
-    }
+const usuario = ref();
 
-    return {
-      handleLogout,
-      formatDate
-    }
-  }
-}
+onMounted(() => {  
+  usuario.value = JSON.parse(localStorage.getItem('user'));
+  
+});
+
 </script>
 
 <style scoped>

@@ -12,7 +12,7 @@
           <input
             id="email"
             v-model="form.email"
-            type="email"
+            type="text"
             placeholder="correo@example.com"
             required
             :disabled="loading"
@@ -54,12 +54,14 @@
 
 <script>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import authService from '../services/authService'
 
 export default {
   name: 'Login',
   emits: ['login-success'],
   setup(props, { emit }) {
+    const router = useRouter()
     const form = ref({
       email: '',
       password: ''
@@ -93,7 +95,7 @@ export default {
           )
 
           // Emitir evento de éxito
-          emit('login-success', response.data.data)
+          router.push('/dashboard')
 
           // Limpiar formulario
           form.value = {
