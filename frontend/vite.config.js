@@ -12,5 +12,10 @@ export default defineConfig({
         rewrite: (path) => path
       }
     }
+  },
+  css: {
+    preprocessorOptions: {
+      scss: { api: 'modern-compiler' },
+    }
   }
 })

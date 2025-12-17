@@ -12,7 +12,7 @@ const apiClient = axios.create({
 
 // Interceptor para agregar token/API Key en cada petición
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token-prestamo');
   if (token) {
     // Usar el token como API Key en el header
     config.headers['x-api-key'] = token;
@@ -40,27 +40,27 @@ export default {
   },
 
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('token-prestamo');
+    localStorage.removeItem('user-prestamo');
   },
 
   // Obtener token y usuario del localStorage
   getToken() {
-    return localStorage.getItem('token');
+    return localStorage.getItem('token-prestamo');
   },
 
   getUser() {
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem('user-prestamo');
     return user ? JSON.parse(user) : null;
   },
 
   // Guardar datos de sesión
   saveSession(token, user) {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('token-prestamo', token);
+    localStorage.setItem('user-prestamo', JSON.stringify(user));
   },
 
   isAuthenticated() {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem('token-prestamo');
   }
 };

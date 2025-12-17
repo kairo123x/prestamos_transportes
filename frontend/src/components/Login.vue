@@ -52,77 +52,60 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import authService from '../services/authService'
+import { useAuthStore } from '../stores/auth'
 
-export default {
-  name: 'Login',
-  emits: ['login-success'],
-  setup(props, { emit }) {
-    const router = useRouter()
-    const form = ref({
-      email: '',
-      password: ''
-    })
-    const loading = ref(false)
-    const error = ref('')
+// defineEmits reemplaza a emits en script setup
+const emit = defineEmits(['login-success'])
 
-    const handleLogin = async () => {
-      error.value = ''
-      loading.value = true
+const router = useRouter()
+const auth = useAuthStore()
 
-      try {
-        // Validar campos
-        if (!form.value.email || !form.value.password) {
-          error.value = 'Por favor completa todos los campos'
-          loading.value = false
-          return
-        }
+const form = ref({
+  email: '',
+  password: ''
+})
+const loading = ref(false)
+const error = ref('')
 
-        // Llamar al API de login
-        const response = await authService.login(
-          form.value.email,
-          form.value.password
-        )
+const handleLogin = async () => {
+  error.value = ''
+  loading.value = true
 
-        if (response.data.success) {
-          // Guardar token y usuario
-          authService.saveSession(
-            response.data.data.Token,
-            response.data.data
-          )
-
-          // Emitir evento de éxito
-          router.push('/dashboard')
-
-          // Limpiar formulario
-          form.value = {
-            email: '',
-            password: ''
-          }
-        }
-      } catch (err) {
-        console.error('Error de login:', err)
-        if (err.response?.status === 401) {
-          error.value = 'Credenciales inválidas. Verifica tu email y contraseña'
-        } else if (err.response?.status === 400) {
-          error.value = 'Por favor completa todos los campos'
-        } else {
-          error.value = 'Error en la conexión con el servidor'
-        }
-      } finally {
-        loading.value = false
-      }
+  try {
+    // Validar campos
+    if (!form.value.email || !form.value.password) {
+      error.value = 'Por favor completa todos los campos'
+      loading.value = false
+      return
     }
 
-    return {
-      form,
-      loading,
-      error,
-      handleLogin
+    // Llamar al API de login
+    const response = await auth.login(
+      form.value.email,
+      form.value.password
+    )
+
+    if (response.data.success) {
+      // Redirigir
+      router.push('/dashboard')
+
+      // Limpiar formulario
+      form.value = { email: '', password: '' }
     }
+  } catch (err) {
+    console.error('Error de login:', err)
+    if (err.response?.status === 401) {
+      error.value = 'Credenciales inválidas. Verifica tu email y contraseña'
+    } else if (err.response?.status === 400) {
+      error.value = 'Por favor completa todos los campos'
+    } else {
+      error.value = 'Error en la conexión con el servidor'
+    }
+  } finally {
+    loading.value = false
   }
 }
 </script>

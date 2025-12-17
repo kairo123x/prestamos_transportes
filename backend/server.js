@@ -12,6 +12,7 @@ import { initSocket } from './services/socket.js';
 /* import boletasRoutes from './routes/boletas.routes.js';
 import tareoRoutes from './routes/tareos.routes.js'; */
 import dotenv from "dotenv";
+import prestamoRoutes from './routes/prestamo.routes.js';
 /* import filePersonalRoutes from './routes/filePersonal.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js'
 import contratosRoutes from './routes/contratos.routes.js';
@@ -34,6 +35,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api', authRoutes);
+app.use('/api/prestamos', prestamoRoutes);
 
 /* app.use('/app4/dashboard', dashboardRoutes);
 app.use('/app4/seguimiento', seguimientoRoutes);

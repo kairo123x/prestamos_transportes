@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/Login.vue";
 import Dashboard from "../components/Dashboard.vue";
 import authService from "../services/authService";
+import Prestamos from "../views/Prestamos.vue";
 
 const routes = [
   {
@@ -13,6 +14,12 @@ const routes = [
     path: "/dashboard",
     name: "Dashboard",
     component: Dashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/prestamos",
+    name: "Prestamo",
+    component: Prestamos,
     meta: { requiresAuth: true },
   },
   {
