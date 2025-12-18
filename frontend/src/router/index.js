@@ -3,6 +3,7 @@ import Login from "../components/Login.vue";
 import Dashboard from "../components/Dashboard.vue";
 import authService from "../services/authService";
 import Prestamos from "../views/Prestamos.vue";
+import MaterialesAsignados from "../views/MaterialesAsignados.vue";
 
 const routes = [
   {
@@ -20,6 +21,12 @@ const routes = [
     path: "/prestamos",
     name: "Prestamo",
     component: Prestamos,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/productos-asignados",
+    name: "Productos-Asignados",
+    component: MaterialesAsignados,
     meta: { requiresAuth: true },
   },
   {

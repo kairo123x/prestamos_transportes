@@ -1,24 +1,4 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
-// Crear instancia de axios
-const apiClient = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-// Interceptor para agregar token/API Key en cada petición
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token-prestamo');
-  if (token) {
-    // Usar el token como API Key en el header
-    config.headers['x-api-key'] = token;
-  }
-  return config;
-});
+import apiClient from "./interceptor";
 
 export default {
   // Autenticación - Usar email y password

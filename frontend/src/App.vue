@@ -68,13 +68,13 @@
         </router-link>
 
         <router-link 
-          to="/usuarios" 
+          to="/productos-asignados" 
           @click="closeMenu" 
           class="sidebar-link"
           active-class="active"
         >
-          <span class="icon">👥</span>
-          <span class="label">Usuarios</span>
+          <span class="icon">📦</span>
+          <span class="label">Materiales Asignados</span>
         </router-link>
 
         <router-link 

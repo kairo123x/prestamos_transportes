@@ -24,9 +24,7 @@ export const useAuthStore = defineStore('auth', {
     checkSession() {
       if (authService.isAuthenticated()) {
         this.isAuthenticated = true
-        this.currentUser = authService.getUser()
-        console.log("Verificacion", this.currentUser);
-        
+        this.currentUser = authService.getUser()        
       }
     }
   }

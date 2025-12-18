@@ -7,7 +7,7 @@
 
     <!-- Tabla de préstamos -->
     <el-table
-      :data="tableData"
+      :data="prestamos"
       style="width: 100%"
       stripe
       border
@@ -21,9 +21,9 @@
       :cell-style="{ color: '#2c3e50', fontSize: '14px' }"
       :row-class-name="tableRowClassName"
     >
-      <el-table-column prop="date" label="Fecha" width="180" />
-      <el-table-column prop="name" label="Nombre" width="180" />
-      <el-table-column prop="address" label="Dirección" />
+      <el-table-column prop="CODIGO" label="Codigo" width="180" />
+      <el-table-column prop="NOMBRE" label="Nombre" width="180" />
+      <el-table-column prop="TIPO" label="Tipo" />
 
       <!-- Columna de acciones -->
       <el-table-column label="Acciones" width="200">
@@ -74,7 +74,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { onMounted, ref } from "vue"
+import {listarProductos, listarMaterialesAsignados} from "../services/prestamoService"
+
+onMounted(()=> {
+  loadListaPrestamos();
+  loadListaAsignados();
+})
 
 const tableData = [
   {
@@ -144,6 +150,31 @@ function formatDate(date) {
     month: "long",
     day: "numeric"
   })
+}
+
+const prestamos = ref([]);
+
+const loadListaPrestamos = async () => {
+  try {
+    const response = await listarProductos();
+    if(response.data.success){
+      prestamos.value = response.data.data;
+    }
+  } catch (error) {
+    console.log('Error en prestamos', error);
+  }
+}
+
+const materialesAsignados = ref([]);
+const loadListaAsignados = async () => {
+  try {
+    const response = await listarMaterialesAsignados();
+    if(response.data.success){
+      materialesAsignados.value = response.data.data;
+    }
+  } catch (error) {
+    console.log('Error en prestamos', error);
+  }
 }
 </script>
 

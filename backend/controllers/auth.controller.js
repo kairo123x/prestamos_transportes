@@ -59,6 +59,7 @@ export const loginController = async (req, res) => {
 
       return apiResponse(res, true, 'Conexión exitosa', {
         IdUser: user.TRAB_ID,
+        Dni:user.TRAB_DNI,
         TrabUsuInt: user.TRAB_USUINT,
         Nombres: user.TRAB_NOMBRES,
         Apellidos: user.TRAB_APELLPAT + ' ' + user.TRAB_APELLMAT,
