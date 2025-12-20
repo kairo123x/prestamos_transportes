@@ -214,7 +214,73 @@ export const aprobarMaterialRecibido = async (req, res) => {
 
     const { idPrestamo } = req.body;
 
-    const query = `update PrestamoMateriales set prestamoAprobado=1 where idPrestamo=@idPrestamo`;
+    const query = `
+      DECLARE 
+        @dniRecepcionador VARCHAR(8),
+        @codEmpresa VARCHAR(2),
+        @tipoProducto VARCHAR(6),
+        @codProducto VARCHAR(30),
+        @cantidad INT,
+        @fechaPrestamo DATE,
+        @descripcionProducto VARCHAR(255);
+
+      SELECT 
+        @dniRecepcionador = dniRecepcionador,
+        @codEmpresa = codEmpresa,
+        @tipoProducto = tipoProducto,
+        @codProducto = codProducto,
+        @cantidad = cantidad,
+        @fechaPrestamo = fechaPrestamo
+      FROM PrestamoMateriales
+      WHERE idPrestamo = @idPrestamo;
+
+      SELECT 
+        @descripcionProducto = STMPDH_DESCRP
+      FROM [02STMA].[dbo].[STMPDH]
+      WHERE STMPDH_ARTCOD = @codProducto
+        AND STMPDH_TIPPRO = @tipoProducto;
+
+      UPDATE PrestamoMateriales 
+      SET prestamoAprobado = 1
+      WHERE idPrestamo = @idPrestamo;
+
+      IF EXISTS (
+        SELECT 1 FROM MaterialesAsignados 
+        WHERE dni = @dniRecepcionador
+          AND codEmpresa = @codEmpresa
+          AND tipoProducto = @tipoProducto
+          AND codProducto = @codProducto
+      )
+      BEGIN
+        UPDATE MaterialesAsignados
+        SET cantidad = cantidad + @cantidad
+        WHERE dni = @dniRecepcionador
+          AND codEmpresa = @codEmpresa
+          AND tipoProducto = @tipoProducto
+          AND codProducto = @codProducto;
+      END
+      ELSE
+      BEGIN
+        INSERT INTO MaterialesAsignados(
+          dni,
+          codEmpresa,
+          tipoProducto,
+          codProducto,
+          descripcionProducto,
+          cantidad,
+          fechaAsignada
+        )
+        VALUES (
+          @dniRecepcionador,
+          @codEmpresa,
+          @tipoProducto,
+          @codProducto,
+          ISNULL(@descripcionProducto, @codProducto),
+          @cantidad,
+          @fechaPrestamo
+        );
+      END
+    `;
 
     const params = {
       idPrestamo: idPrestamo
@@ -232,6 +298,64 @@ export const aprobarMaterialRecibido = async (req, res) => {
   }
 }
 
+export const listarMaterialesTrabajadorCombinado = async (req, res) => {
+  try {
+    const { dni } = req.query;
+
+    const query = `
+      SELECT 
+        src.dni,
+        src.codEmpresa,
+        src.tipoProducto,
+        src.codProducto,
+        src.descripcionProducto,
+        SUM(src.cantidad) AS cantidad
+      FROM (
+        SELECT 
+          MA.dni,
+          MA.codEmpresa,
+          MA.tipoProducto,
+          MA.codProducto,
+          MA.descripcionProducto,
+          MA.cantidad
+        FROM MaterialesAsignados MA
+        WHERE MA.dni = @dni
+        UNION ALL
+        SELECT 
+          PM.dniRecepcionador AS dni,
+          PM.codEmpresa,
+          PM.tipoProducto,
+          PM.codProducto,
+          PM.codProducto AS descripcionProducto,
+          PM.cantidad
+        FROM PrestamoMateriales PM
+        WHERE PM.dniRecepcionador = @dni
+          AND PM.prestamoAprobado = 1
+          AND PM.prestamoDevuelto = 0
+      ) AS src
+      GROUP BY 
+        src.dni,
+        src.codEmpresa,
+        src.tipoProducto,
+        src.codProducto,
+        src.descripcionProducto
+    `;
+
+    const params = {
+      dni: dni
+    };
+
+    const result = await executeQuery(configLogin, query, params);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    console.error("❌ Error en el controlador:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
+  }
+}
 
 /* export async function AsignarProducto(idDocument) {
   try {

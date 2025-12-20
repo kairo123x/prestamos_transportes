@@ -23,7 +23,7 @@
     >
       <el-table-column prop="dniPrestador" label="DNI Prestador" width="180" />
       <el-table-column prop="dniRecepcionador" label="DNI Recepcionador" width="180" />
-      <el-table-column prop="codEmpresa" label="Codigo de Producto" />
+      <el-table-column prop="codProducto" label="Codigo de Producto" />
       <el-table-column prop="tipoProducto" label="Tipo de Producto" />
       <el-table-column prop="codEmpresa" label="Codigo de Empresa" />
       <el-table-column prop="prestamoAprobado" label="Aprobado" >

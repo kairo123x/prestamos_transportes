@@ -117,3 +117,16 @@ export const aprobarMaterialRecibido = async (data) => {
         console.error('Error', error);
     }
 }
+
+export const listarMaterialesTrabajadorCombinado = async (dni) => {
+    try {
+        const response = await apiClient.get(rutaGeneral+'/materiales-trabajador-combinado', {
+            params: {
+                dni: dni
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}
