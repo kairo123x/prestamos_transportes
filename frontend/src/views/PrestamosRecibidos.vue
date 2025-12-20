@@ -1,64 +1,78 @@
 <template>
   <div class="crud-container">
-    <h2>📦 Préstamos de Materiales Recibidos</h2>
+    <div class="page-layout">
+      <header class="page-header">
+        <div class="page-title-block">
+          <h2>Préstamos de materiales recibidos</h2>
+          <p class="page-subtitle">
+            Revise y apruebe la recepción de materiales prestados por otros colaboradores.
+          </p>
+        </div>
+      </header>
 
-    <!-- Tabla de préstamos -->
-    <el-table
-      :data="prestamos"
-      style="width: 100%"
-      stripe
-      border
-      highlight-current-row
-      :header-cell-style="{
-        backgroundColor: '#007bff', 
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: '14px'
-      }"
-      :cell-style="{ color: '#2c3e50', fontSize: '14px' }"
-      :row-class-name="tableRowClassName"
-    >
-      <el-table-column prop="dniPrestador" label="Codigo" width="180" />
-      <el-table-column prop="dniRecepcionador" label="Nombre" width="180" />
-      <el-table-column prop="codEmpresa" label="Tipo" />
-      <el-table-column prop="tipoProducto" label="Tipo de Producto" />
-      <el-table-column prop="codEmpresa" label="Codigo de Producto" />
-      <el-table-column prop="prestamoAprobado" label="Aprobado" >
-        <template #default="scope">
-          {{ scope.row.prestamoAprobado==true?'SI':'NO' }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="prestamoDevuelto" label="Fue Devuelto" >
-        <template #default="scope">
-          {{ scope.row.prestamoDevuelto==true?'SI':'NO' }}
-        </template>
-      </el-table-column>
-      <el-table-column prop="fechaPrestamo" label="Fecha de Prestamo">
-        <template #default="scope">
-          {{ FormatFechaCorta(scope.row.fechaPrestamo) }}
-        </template>
-      </el-table-column>
-
-      <!-- Columna de acciones -->
-      <el-table-column label="Acciones" width="200">
-        <template #default="scope">
-          <el-button
-            type="primary"
-            size="small"
-            @click="aprobarRecepcionPrestamo(scope.row)"
-            v-if="scope.row.prestamoAprobado==false"
+      <section class="page-card">
+        <div class="card-header">
+          <h3>Listado de préstamos recibidos</h3>
+        </div>
+        <div class="card-body table-wrapper">
+          <el-table
+            :data="prestamos"
+            style="width: 100%"
+            stripe
+            border
+            highlight-current-row
+            :header-cell-style="{
+              backgroundColor: '#2563eb',
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '13px'
+            }"
+            :cell-style="{ color: '#1f2933', fontSize: '13px' }"
           >
-            Aprobar
-          </el-button>
-          <span v-else>---</span>
-        </template>
-      </el-table-column>
-    </el-table>
+            <el-table-column prop="dniPrestador" label="DNI prestador" width="150" />
+            <el-table-column prop="dniRecepcionador" label="DNI recepcionador" width="150" />
+            <el-table-column prop="codEmpresa" label="Empresa" width="120" />
+            <el-table-column prop="tipoProducto" label="Tipo de producto" width="150" />
+            <el-table-column prop="codEmpresa" label="Código de producto" width="150" />
+            <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
+              <template #default="scope">
+                {{ scope.row.prestamoAprobado ? 'Sí' : 'No' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="prestamoDevuelto" label="Devuelto" width="120" >
+              <template #default="scope">
+                {{ scope.row.prestamoDevuelto ? 'Sí' : 'No' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="fechaPrestamo" label="Fecha de préstamo" width="160">
+              <template #default="scope">
+                {{ FormatFechaCorta(scope.row.fechaPrestamo) }}
+              </template>
+            </el-table-column>
+
+            <el-table-column label="Acciones" width="180" :fixed="isMobile ? false : 'right'">
+              <template #default="scope">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="aprobarRecepcionPrestamo(scope.row)"
+                  v-if="scope.row.prestamoAprobado==false"
+                >
+                  Aprobar recepción
+                </el-button>
+                <span v-else>---</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue"
+import { ElMessage, ElMessageBox } from "element-plus";
 import {listarProductos, ListarPrestamosRecibidos, listarTrabajadores, aprobarMaterialRecibido} from "../services/prestamoService"
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
@@ -127,158 +141,147 @@ const aprobar = (loan) => {
 
 const aprobarRecepcionPrestamo = async (item) => {
   try {
-    const confirmar = confirm(`¿Seguro que deseas aprobar la recepción del material con ID de préstamo ${item.idPrestamo}?`);
-    if (!confirmar) {
-      return;
-    }
+    await ElMessageBox.confirm(
+      `¿Confirma que desea aprobar la recepción del material correspondiente al préstamo Nº ${item.idPrestamo}?`,
+      'Confirmar recepción de material',
+      {
+        confirmButtonText: 'Sí, aprobar',
+        cancelButtonText: 'Cancelar',
+        type: 'warning'
+      }
+    );
 
     const data = {
       idPrestamo: item.idPrestamo
     };
     const response = await aprobarMaterialRecibido(data);
     if(response.data.success){
-      alert('Préstamo aprobado con éxito');
+      ElMessage.success('La recepción del material fue aprobada correctamente y el stock ha sido actualizado.');
       loadListaPrestamos();
     }
   } catch (error) {
     console.log('Error al aprobar préstamo', error);
+    ElMessage.error('Se produjo un error al aprobar la recepción del material. Intente nuevamente.');
   }
 };
 </script>
 
 <style scoped>
 .crud-container {
-  padding: 20px;
-  background: #f9f9f9;
   min-height: 100vh;
-  font-family: "Segoe UI", Roboto, sans-serif;
+  padding: 24px;
+  background: radial-gradient(circle at top left, #e5edff 0, #edf2ff 45%, #e5e7eb 100%);
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page-layout {
+  width: 100%;
+  max-width: 100%;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.page-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 h2 {
-  margin-bottom: 20px;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-bottom: 15px;
-}
-.btn-primary:hover {
-  background: #0056b3;
-}
-
-.crud-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-.crud-table th, .crud-table td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: left;
-}
-.crud-table th {
-  background: #007bff;
-  color: white;
-}
-
-.btn-edit {
-  background: #ffc107;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 6px;
-}
-.btn-edit:hover {
-  background: #e0a800;
-}
-
-.btn-delete {
-  background: #dc3545;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  color: white;
-}
-.btn-delete:hover {
-  background: #c82333;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.modal {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-.modal h3 {
-  margin-top: 0;
-}
-.modal label {
-  display: block;
-  margin-top: 10px;
+  font-size: 22px;
   font-weight: 600;
-}
-.modal input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.modal-actions {
-  margin-top: 15px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn-secondary:hover {
-  background: #5a6268;
+  color: #1f2933;
 }
 
-.row-even {
-  background-color: #f9f9f9;
-}
-.row-odd {
-  background-color: #ffffff;
+.page-subtitle {
+  font-size: 13px;
+  color: #4b5563;
 }
 
-/* Hover elegante */
+.el-table {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(15, 35, 52, 0.06);
+  padding: 4px 0 12px 0;
+}
+
+.el-table__header th {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .el-table__row:hover {
-  background-color: #eaf2f8 !important;
-  transition: background-color 0.3s ease;
+  background-color: #f0f5ff !important;
+  transition: background-color 0.25s ease;
 }
 
-/* Botones más elegantes */
 .el-button {
-  margin: 0 4px;
+  border-radius: 6px;
+  font-size: 13px;
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.page-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.card-body {
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .crud-container {
+    padding: 12px;
+  }
+
+  h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-layout {
+    max-width: 100%;
+  }
+
+  .page-card {
+    border-radius: 10px;
+  }
+
+  .card-body {
+    padding: 8px 10px 10px 10px;
+  }
+}
 </style>

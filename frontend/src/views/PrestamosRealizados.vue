@@ -1,70 +1,82 @@
 <template>
   <div class="crud-container">
-    <h2>📦 Préstamos de Materiales Asignados</h2>
+    <div class="page-layout">
+      <header class="page-header">
+        <div class="page-title-block">
+          <h2>Préstamos de materiales asignados</h2>
+          <p class="page-subtitle">
+            Registre y gestione los préstamos de materiales realizados a otros colaboradores.
+          </p>
+        </div>
+        <div class="page-actions">
+          <button class="btn-primary" @click="openModal()">Nuevo préstamo</button>
+        </div>
+      </header>
 
-    <!-- Botón para abrir modal -->
-    <button class="btn-primary" @click="openModal()">➕ Nuevo Préstamo</button>
-
-    <!-- Tabla de préstamos -->
-    <el-table
-      :data="prestamos"
-      style="width: 100%"
-      stripe
-      border
-      highlight-current-row
-      :header-cell-style="{
-        backgroundColor: '#007bff', 
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: '14px'
-      }"
-      :cell-style="{ color: '#2c3e50', fontSize: '14px' }"
-      :row-class-name="tableRowClassName"
-    >
-      <el-table-column prop="dniPrestador" label="DNI Prestador" width="180" />
-      <el-table-column prop="dniRecepcionador" label="DNI Recepcionador" width="180" />
-      <el-table-column prop="codProducto" label="Codigo de Producto" />
-      <el-table-column prop="tipoProducto" label="Tipo de Producto" />
-      <el-table-column prop="codEmpresa" label="Codigo de Empresa" />
-      <el-table-column prop="prestamoAprobado" label="Aprobado" >
-        <template #default="scope">
-          {{ scope==true?'SI':'NO' }}
-        </template>
-      </el-table-column> 
-      <el-table-column prop="prestamoDevuelto" label="Fue Devuelto" >
-        <template #default="scope">
-          {{ scope.row.prestamoDevuelto==true?'SI':'NO' }}
-        </template>
-      </el-table-column> 
-      <el-table-column prop="fechaPrestamo" label="Fecha de Prestamo" >
-        <template #default="scope">
-          {{ FormatFechaCorta(scope.row.fechaPrestamo) }}
-        </template>
-      </el-table-column> 
-        
-
-      <!-- Columna de acciones -->
-      <el-table-column label="Acciones" width="200">
-        <template #default="scope">
-          <el-button
-            type="primary"
-            size="small"
-            @click="editar(scope.row)"
-            v-if="scope.row.prestamoDevuelto==false"
+      <section class="page-card">
+        <div class="card-header">
+          <h3>Listado de préstamos realizados</h3>
+        </div>
+        <div class="card-body table-wrapper">
+          <el-table
+            :data="prestamos"
+            style="width: 100%"
+            stripe
+            border
+            highlight-current-row
+            :header-cell-style="{
+              backgroundColor: '#2563eb',
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '13px'
+            }"
+            :cell-style="{ color: '#1f2933', fontSize: '13px' }"
           >
-            Editar
-          </el-button>
-          <el-button
-            type="danger"
-            size="small"
-            @click="eliminar(scope.row)"
-            v-if="scope.row.prestamoDevuelto==false"
-          >
-            Eliminar
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+            <el-table-column prop="dniPrestador" label="DNI prestador" width="150" />
+            <el-table-column prop="dniRecepcionador" label="DNI recepcionador" width="150" />
+            <el-table-column prop="codProducto" label="Código producto" width="150" />
+            <el-table-column prop="tipoProducto" label="Tipo de producto" width="150" />
+            <el-table-column prop="codEmpresa" label="Empresa" width="120" />
+            <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
+              <template #default="scope">
+                {{ scope.row.prestamoAprobado ? 'Sí' : 'No' }}
+              </template>
+            </el-table-column> 
+            <el-table-column prop="prestamoDevuelto" label="Devuelto" width="120" >
+              <template #default="scope">
+                {{ scope.row.prestamoDevuelto ? 'Sí' : 'No' }}
+              </template>
+            </el-table-column> 
+            <el-table-column prop="fechaPrestamo" label="Fecha de préstamo" width="160" >
+              <template #default="scope">
+                {{ FormatFechaCorta(scope.row.fechaPrestamo) }}
+              </template>
+            </el-table-column> 
+
+            <el-table-column label="Acciones" width="210" :fixed="isMobile ? false : 'right'">
+              <template #default="scope">
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="editar(scope.row)"
+                  v-if="scope.row.prestamoDevuelto==false"
+                >
+                  Editar
+                </el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  @click="eliminar(scope.row)"
+                  v-if="scope.row.prestamoDevuelto==false"
+                >
+                  Eliminar
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </section>
+    </div>
 
     <!-- Modal -->
     <el-dialog v-model="showModal" title="Prestamo de material" :width="dialogWidth">
@@ -121,6 +133,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from "vue"
+import { ElMessage, ElMessageBox } from "element-plus";
 import { 
   ListarPrestamosRealizados, 
   listarTrabajadores, 
@@ -240,7 +253,7 @@ const guardarPrestamoMaterial = async() => {
   try {
     //Validacion
     if(formPrestamoMaterial.value.cantidad==0){
-      alert('Coloque una cantidad mayor a 0')
+      ElMessage.warning('Ingrese una cantidad mayor a 0 para registrar el préstamo.');
       return;
     }
 
@@ -249,12 +262,12 @@ const guardarPrestamoMaterial = async() => {
     );
 
     if (!productoStock) {
-      alert('No se encontró el stock del producto seleccionado');
+      ElMessage.error('No se encontró información de stock para el producto seleccionado.');
       return;
     }
 
     if (formPrestamoMaterial.value.cantidad > productoStock.cantidad) {
-      alert('La cantidad a prestar no puede ser mayor al stock asignado que tienes de este material');
+      ElMessage.warning('La cantidad solicitada en préstamo no puede ser mayor al stock asignado que posee de este material.');
       return;
     }
 
@@ -271,14 +284,25 @@ const guardarPrestamoMaterial = async() => {
     const fechaSQL = fecha.toISOString().split('T')[0];
     formPrestamoMaterial.value.fechaPrestamo = fechaSQL;
 
+    const confirmar = await ElMessageBox.confirm(
+      `¿Confirma que desea registrar el préstamo de ${formPrestamoMaterial.value.cantidad} unidad(es) del material ${producto.codProducto}?`,
+      'Confirmar registro de préstamo',
+      {
+        confirmButtonText: 'Sí, registrar',
+        cancelButtonText: 'Cancelar',
+        type: 'warning'
+      }
+    );
+
     const response = await PrestarMaterial(formPrestamoMaterial.value);
     if(response.data.success){
-      alert('Prestamo Realizado con Exito')
+      ElMessage.success('El préstamo de material se registró correctamente.');
       showModal.value=false;
       loadListaPrestamos();
     }
   } catch (error) {
     console.log('Error de material', error);
+    ElMessage.error('Ocurrió un error al registrar el préstamo de material. Inténtelo nuevamente.');
   }
 }
 
@@ -292,138 +316,165 @@ const maxCantidadDisponible = computed(() => {
 </script>
 
 <style scoped>
-.crud-container {
-  padding: 20px;
-  background: #f9f9f9;
-  min-height: 100vh;
-  font-family: "Segoe UI", Roboto, sans-serif;
+.page-layout {
+  width: 100%;
+  max-width: 100%;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.page-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 h2 {
-  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1f2933;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .btn-primary {
-  background: #007bff;
-  color: white;
+  background: linear-gradient(135deg, #0066cc, #004c99);
+  color: #ffffff;
   border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-bottom: 15px;
-}
-.btn-primary:hover {
-  background: #0056b3;
-}
-
-.crud-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-.crud-table th, .crud-table td {
-  padding: 10px;
-  border: 1px solid #ddd;
-  text-align: left;
-}
-.crud-table th {
-  background: #007bff;
-  color: white;
-}
-
-.btn-edit {
-  background: #ffc107;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 6px;
-}
-.btn-edit:hover {
-  background: #e0a800;
-}
-
-.btn-delete {
-  background: #dc3545;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  color: white;
-}
-.btn-delete:hover {
-  background: #c82333;
-}
-
-/* Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.modal {
-  background: white;
-  padding: 20px;
+  padding: 8px 18px;
   border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-.modal h3 {
-  margin-top: 0;
-}
-.modal label {
-  display: block;
-  margin-top: 10px;
-  font-weight: 600;
-}
-.modal input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.modal-actions {
-  margin-top: 15px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
   cursor: pointer;
-}
-.btn-secondary:hover {
-  background: #5a6268;
-}
-
-.row-even {
-  background-color: #f9f9f9;
-}
-.row-odd {
-  background-color: #ffffff;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.28);
+  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.1s ease;
 }
 
-/* Hover elegante */
+.btn-primary:hover {
+  background: linear-gradient(135deg, #005bb5, #004280);
+  box-shadow: 0 4px 12px rgba(0, 90, 180, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 90, 180, 0.25);
+}
+
+.crud-container {
+  min-height: 100vh;
+  padding: 24px;
+  background: radial-gradient(circle at top left, #e5edff 0, #edf2ff 45%, #e5e7eb 100%);
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.el-table {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(15, 35, 52, 0.06);
+  padding: 4px 0 12px 0;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.page-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.card-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.card-body {
+  padding: 0;
+}
+
+.el-table__header th {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 .el-table__row:hover {
-  background-color: #eaf2f8 !important;
-  transition: background-color 0.3s ease;
+  background-color: #f0f5ff !important;
+  transition: background-color 0.25s ease;
 }
 
-/* Botones más elegantes */
 .el-button {
-  margin: 0 4px;
+  border-radius: 6px;
+  font-size: 13px;
 }
 
+.dialog-footer {
+  padding-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .crud-container {
+    padding: 12px;
+  }
+
+  h2 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-actions {
+    justify-content: flex-start;
+  }
+
+  .page-layout {
+    max-width: 100%;
+  }
+
+  .page-card {
+    border-radius: 10px;
+  }
+
+  .card-body {
+    padding: 8px 10px 10px 10px;
+  }
+}
 </style>

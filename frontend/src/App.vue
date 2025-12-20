@@ -15,7 +15,7 @@
           ☰
         </button>
         <div class="navbar-brand">
-          <h2>🚗 Préstamos Transporte</h2>
+          <h2>Gestión de Préstamos - Transporte</h2>
         </div>
       </div>
       <div class="navbar-right">
@@ -24,7 +24,7 @@
           <small class="user-role">{{ auth.currentUser?.Rolname }}</small>
         </div>
         <button @click="handleLogout" class="btn-logout" title="Cerrar sesión">
-          🚪 Cerrar
+          Cerrar sesión
         </button>
       </div>
     </nav>
@@ -32,7 +32,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" :class="{ active: showMenu }">
       <div class="sidebar-header">
-        <h3>Menú Principal</h3>
+        <h3>Menú principal</h3>
         <button class="btn-close-sidebar" @click="closeMenu">✕</button>
       </div>
       
@@ -73,8 +73,8 @@
           class="sidebar-link"
           active-class="active"
         >
-          <span class="icon">📦</span>
-          <span class="label">Materiales Asignados</span>
+          <span class="icon">▢</span>
+          <span class="label">Materiales asignados</span>
         </router-link>
 
         <router-link 
@@ -83,8 +83,8 @@
           class="sidebar-link"
           active-class="active"
         >
-          <span class="icon">💰</span>
-          <span class="label">Prestamos Realizados</span>
+          <span class="icon">⇄</span>
+          <span class="label">Préstamos realizados</span>
         </router-link>
 
         <router-link 
@@ -93,15 +93,15 @@
           class="sidebar-link"
           active-class="active"
         >
-          <span class="icon">📦</span>
-          <span class="label">Prestamos Recibidos</span>
+          <span class="icon">↧</span>
+          <span class="label">Préstamos recibidos</span>
         </router-link>
       </nav>
 
       <div class="sidebar-footer">
         <button @click="handleLogout" class="btn-logout-sidebar">
-          <span class="icon">🚪</span>
-          <span class="label">Cerrar Sesión</span>
+          <span class="icon">⎋</span>
+          <span class="label">Cerrar sesión</span>
         </button>
       </div>
     </aside>
@@ -152,7 +152,7 @@ const handleLogout = () => {
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f5f5;
+  background: #edf2f7;
 }
 
 #app {
@@ -161,15 +161,15 @@ body {
 
 .dashboard-container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #f3f4f6;
   display: flex;
   flex-direction: column;
 }
 
 /* Navbar */
 .navbar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #1e40af 100%);
+  color: #f9fafb;
   padding: 15px 20px;
   display: flex;
   justify-content: space-between;
@@ -296,7 +296,7 @@ body {
   left: 0;
   width: 280px;
   height: 100vh;
-  background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+  background: linear-gradient(180deg, #1f2937 0%, #111827 60%, #020617 100%);
   color: white;
   z-index: 101;
   display: flex;
