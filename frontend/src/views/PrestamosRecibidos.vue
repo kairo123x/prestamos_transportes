@@ -127,6 +127,11 @@ const aprobar = (loan) => {
 
 const aprobarRecepcionPrestamo = async (item) => {
   try {
+    const confirmar = confirm(`¿Seguro que deseas aprobar la recepción del material con ID de préstamo ${item.idPrestamo}?`);
+    if (!confirmar) {
+      return;
+    }
+
     const data = {
       idPrestamo: item.idPrestamo
     };

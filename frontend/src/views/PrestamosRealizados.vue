@@ -244,6 +244,20 @@ const guardarPrestamoMaterial = async() => {
       return;
     }
 
+    const productoStock = listaProductos.value.find(
+      p => p.codProducto === formPrestamoMaterial.value.codProducto
+    );
+
+    if (!productoStock) {
+      alert('No se encontró el stock del producto seleccionado');
+      return;
+    }
+
+    if (formPrestamoMaterial.value.cantidad > productoStock.cantidad) {
+      alert('La cantidad a prestar no puede ser mayor al stock asignado que tienes de este material');
+      return;
+    }
+
     const producto = listaProductos.value.find(
       p => p.codProducto === formPrestamoMaterial.value.codProducto
     );
@@ -273,7 +287,7 @@ const maxCantidadDisponible = computed(() => {
   const producto = listaProductos.value.find(
     p => p.codProducto === formPrestamoMaterial.value.codProducto
   );
-  return producto ? producto.cantidadDisponible : 1; 
+  return producto ? producto.cantidad : 1; 
 });
 </script>
 
