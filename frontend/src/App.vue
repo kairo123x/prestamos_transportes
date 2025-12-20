@@ -37,7 +37,7 @@
       </div>
       
       <nav class="sidebar-nav">
-        <router-link 
+        <!-- <router-link 
           to="/dashboard" 
           @click="closeMenu" 
           class="sidebar-link"
@@ -65,7 +65,7 @@
         >
           <span class="icon">👥</span>
           <span class="label">Usuarios</span>
-        </router-link>
+        </router-link> -->
 
         <router-link 
           to="/productos-asignados" 
@@ -84,7 +84,17 @@
           active-class="active"
         >
           <span class="icon">💰</span>
-          <span class="label">Préstamos</span>
+          <span class="label">Prestamos Realizados</span>
+        </router-link>
+
+        <router-link 
+          to="/prestamos-recibidos" 
+          @click="closeMenu" 
+          class="sidebar-link"
+          active-class="active"
+        >
+          <span class="icon">📦</span>
+          <span class="label">Prestamos Recibidos</span>
         </router-link>
       </nav>
 

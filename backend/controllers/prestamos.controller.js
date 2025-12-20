@@ -135,6 +135,104 @@ export const listarTrabajadores = async (req, res) => {
   }
 }
 
+export const listarPrestamosRealizados = async (req, res) => {
+  try {
+    const { dniPrestador } = req.query;
+
+    const query = `select * from PrestamoMateriales where dniPrestador=@dniPrestador`;
+
+    const params = {
+      dniPrestador: dniPrestador
+    }
+
+    const result = await executeQuery(configLogin, query, params);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    console.error("❌ Error en el controlador:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
+  }
+}
+
+export const listarPrestamosRecibidos = async (req, res) => {
+  try {
+    const { dniRecepcionador } = req.query;
+
+    const query = `select * from PrestamoMateriales where dniRecepcionador=@dniRecepcionador`;
+
+    const params = {
+      dniRecepcionador: dniRecepcionador
+    }
+
+    const result = await executeQuery(configLogin, query, params);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    console.error("❌ Error en el controlador:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
+  }
+}
+
+export const prestarMaterial = async (req, res) => {
+  try {
+    const { dniPrestador, dniRecepcionador, codEmpresa, tipoProducto, codProducto, prestamoAprobado, prestamoDevuelto, cantidad, fechaPrestamo } = req.body;
+
+    const query = `insert into PrestamoMateriales(dniPrestador, dniRecepcionador, codEmpresa, tipoProducto, codProducto, prestamoAprobado, prestamoDevuelto, cantidad, fechaPrestamo) values (@dniPrestador, @dniRecepcionador, @codEmpresa, @tipoProducto, @codProducto, 0, 0, @cantidad, @fechaPrestamo)`;
+
+    const params = {
+      dniPrestador: dniPrestador,
+      dniRecepcionador: dniRecepcionador, 
+      codEmpresa: codEmpresa,
+      tipoProducto: tipoProducto,
+      codProducto: codProducto,
+      prestamoAprobado: prestamoAprobado,
+      prestamoDevuelto: prestamoDevuelto,
+      cantidad: cantidad,
+      fechaPrestamo: fechaPrestamo
+    }
+
+    const result = await executeQuery(configLogin, query, params);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    console.error("❌ Error en el controlador:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
+  }
+}
+
+export const aprobarMaterialRecibido = async (req, res) => {
+  try {
+
+    const { idPrestamo } = req.body;
+
+    const query = `update PrestamoMateriales set prestamoAprobado=1 where idPrestamo=@idPrestamo`;
+
+    const params = {
+      idPrestamo: idPrestamo
+    }
+
+    const result = await executeQuery(configLogin, query, params);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    console.error("❌ Error en el controlador:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
+  }
+}
+
+
 /* export async function AsignarProducto(idDocument) {
   try {
     const query = `

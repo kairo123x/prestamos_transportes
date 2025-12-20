@@ -73,3 +73,47 @@ export const ConsumirMaterialAsignado = async (data) => {
         console.error('Error', error);
     }
 }
+
+export const ListarPrestamosRealizados = async (dniPrestador) => {
+    try {
+        const response = await apiClient.get(rutaGeneral+'/listar-prestamos-realizados', {
+            params: {
+                dniPrestador: dniPrestador
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}
+
+export const ListarPrestamosRecibidos = async (dniRecepcionador) => {
+    try {
+        const response = await apiClient.get(rutaGeneral+'/listar-prestamos-recibidos', {
+            params: {
+                dniRecepcionador: dniRecepcionador
+            }
+        });
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}
+
+export const PrestarMaterial = async (data) => {
+    try {
+        const response = await apiClient.post(rutaGeneral+'/prestar-material', data);
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}
+
+export const aprobarMaterialRecibido = async (data) => {
+    try {
+        const response = await apiClient.post(rutaGeneral+'/aprobar-material-recibido', data); 
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}

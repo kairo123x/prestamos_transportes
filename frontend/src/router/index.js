@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/Login.vue";
 import Dashboard from "../components/Dashboard.vue";
 import authService from "../services/authService";
-import Prestamos from "../views/Prestamos.vue";
+import Prestamos from "../views/PrestamosRealizados.vue";
 import MaterialesAsignados from "../views/MaterialesAsignados.vue";
+import PrestamosRecibidos from "../views/PrestamosRecibidos.vue";
 
 const routes = [
   {
@@ -21,6 +22,12 @@ const routes = [
     path: "/prestamos",
     name: "Prestamo",
     component: Prestamos,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/prestamos-recibidos",
+    name: "PrestamoRecibidos",
+    component: PrestamosRecibidos,
     meta: { requiresAuth: true },
   },
   {

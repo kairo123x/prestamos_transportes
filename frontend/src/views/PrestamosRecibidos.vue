@@ -1,9 +1,6 @@
 <template>
   <div class="crud-container">
-    <h2>📦 Préstamos de Materiales</h2>
-
-    <!-- Botón para abrir modal -->
-    <button class="btn-primary" @click="openModal()">➕ Nuevo Préstamo</button>
+    <h2>📦 Préstamos de Materiales Recibidos</h2>
 
     <!-- Tabla de préstamos -->
     <el-table
@@ -21,9 +18,26 @@
       :cell-style="{ color: '#2c3e50', fontSize: '14px' }"
       :row-class-name="tableRowClassName"
     >
-      <el-table-column prop="CODIGO" label="Codigo" width="180" />
-      <el-table-column prop="NOMBRE" label="Nombre" width="180" />
-      <el-table-column prop="TIPO" label="Tipo" />
+      <el-table-column prop="dniPrestador" label="Codigo" width="180" />
+      <el-table-column prop="dniRecepcionador" label="Nombre" width="180" />
+      <el-table-column prop="codEmpresa" label="Tipo" />
+      <el-table-column prop="tipoProducto" label="Tipo de Producto" />
+      <el-table-column prop="codEmpresa" label="Codigo de Producto" />
+      <el-table-column prop="prestamoAprobado" label="Aprobado" >
+        <template #default="scope">
+          {{ scope.row.prestamoAprobado==true?'SI':'NO' }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="prestamoDevuelto" label="Fue Devuelto" >
+        <template #default="scope">
+          {{ scope.row.prestamoDevuelto==true?'SI':'NO' }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="fechaPrestamo" label="Fecha de Prestamo">
+        <template #default="scope">
+          {{ FormatFechaCorta(scope.row.fechaPrestamo) }}
+        </template>
+      </el-table-column>
 
       <!-- Columna de acciones -->
       <el-table-column label="Acciones" width="200">
@@ -31,84 +45,40 @@
           <el-button
             type="primary"
             size="small"
-            @click="editar(scope.row)"
+            @click="aprobarRecepcionPrestamo(scope.row)"
+            v-if="scope.row.prestamoAprobado==false"
           >
-            Editar
+            Aprobar
           </el-button>
-          <el-button
-            type="danger"
-            size="small"
-            @click="eliminar(scope.row)"
-          >
-            Eliminar
-          </el-button>
+          <span v-else>---</span>
         </template>
       </el-table-column>
     </el-table>
-
-    <!-- Modal -->
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <h3>{{ editingLoan ? 'Editar Préstamo' : 'Nuevo Préstamo' }}</h3>
-        <form @submit.prevent="saveLoan">
-          <label>Material</label>
-          <input v-model="form.material" required />
-
-          <label>Cantidad</label>
-          <input type="number" v-model="form.cantidad" required />
-
-          <label>Solicitante</label>
-          <input v-model="form.solicitante" required />
-
-          <label>Fecha</label>
-          <input type="date" v-model="form.fecha" required />
-
-          <div class="modal-actions">
-            <button type="submit" class="btn-primary">💾 Guardar</button>
-            <button type="button" class="btn-secondary" @click="closeModal">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue"
-import {listarProductos, listarMaterialesAsignados} from "../services/prestamoService"
+import {listarProductos, ListarPrestamosRecibidos, listarTrabajadores, aprobarMaterialRecibido} from "../services/prestamoService"
+import { useAuthStore } from "../stores/auth";
+import { useRouter } from "vue-router";
+import { FormatFechaCorta } from "../utils";
+
+const router = useRouter()
+
+const dniUser = ref(null);
+
+const auth = useAuthStore();
 
 onMounted(()=> {
+  if(auth.currentUser==null){
+    router.push({name:'Login'});
+  }
+  dniUser.value  = auth.currentUser.Dni;
+
+  loadTrabajadores();
   loadListaPrestamos();
-  loadListaAsignados();
 })
-
-const tableData = [
-  {
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-04',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-01',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-]
-
-const loans = ref([
-  { id: 1, material: "Laptop", cantidad: 2, solicitante: "Juan Pérez", fecha: "2025-12-10" },
-  { id: 2, material: "Proyector", cantidad: 1, solicitante: "María López", fecha: "2025-12-12" }
-])
 
 const showModal = ref(false)
 const editingLoan = ref(null)
@@ -125,38 +95,11 @@ function openModal(loan = null) {
   showModal.value = true
 }
 
-function closeModal() {
-  showModal.value = false
-}
-
-function saveLoan() {
-  if (editingLoan.value) {
-    const index = loans.value.findIndex(l => l.id === editingLoan.value.id)
-    loans.value[index] = { ...form.value }
-  } else {
-    form.value.id = loans.value.length + 1
-    loans.value.push({ ...form.value })
-  }
-  closeModal()
-}
-
-function deleteLoan(id) {
-  loans.value = loans.value.filter(l => l.id !== id)
-}
-
-function formatDate(date) {
-  return new Date(date).toLocaleDateString("es-PE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  })
-}
-
 const prestamos = ref([]);
 
 const loadListaPrestamos = async () => {
-  try {
-    const response = await listarProductos();
+  try {    
+    const response = await ListarPrestamosRecibidos(dniUser.value);
     if(response.data.success){
       prestamos.value = response.data.data;
     }
@@ -165,17 +108,37 @@ const loadListaPrestamos = async () => {
   }
 }
 
-const materialesAsignados = ref([]);
-const loadListaAsignados = async () => {
+const listaTrabajadores = ref([]);
+
+const loadTrabajadores = async() => {
   try {
-    const response = await listarMaterialesAsignados();
+    const response = await listarTrabajadores();
     if(response.data.success){
-      materialesAsignados.value = response.data.data;
+      listaTrabajadores.value = response.data.data;
     }
   } catch (error) {
-    console.log('Error en prestamos', error);
+    console.log('Error en lista de productos', error);
   }
-}
+};
+
+const aprobar = (loan) => {
+  alert(`Préstamo aprobado para ${loan.dniRecepcionador}`);
+};
+
+const aprobarRecepcionPrestamo = async (item) => {
+  try {
+    const data = {
+      idPrestamo: item.idPrestamo
+    };
+    const response = await aprobarMaterialRecibido(data);
+    if(response.data.success){
+      alert('Préstamo aprobado con éxito');
+      loadListaPrestamos();
+    }
+  } catch (error) {
+    console.log('Error al aprobar préstamo', error);
+  }
+};
 </script>
 
 <style scoped>

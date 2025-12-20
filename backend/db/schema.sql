@@ -10,14 +10,15 @@ CREATE TABLE MaterialesAsignados (
 )
 
 CREATE TABLE PrestamoMateriales (
-	idPrestamo INT PRIMARY KEY,
-	dniSolicitante VARCHAR(8),
+	idPrestamo INT PRIMARY KEY IDENTITY(1,1),
+	dniPrestador VARCHAR(8),
 	dniRecepcionador VARCHAR(8),
 	codEmpresa VARCHAR(2),
 	tipoProducto VARCHAR(6),
 	codProducto VARCHAR(30),
 	prestamoAprobado BIT,
 	prestamoDevuelto BIT,
+	cantidad INT,
 	fechaPrestamo DATE
 )
 

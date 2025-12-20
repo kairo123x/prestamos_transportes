@@ -7,4 +7,8 @@ const formatDate = (date) => {
   })
 }
 
-export { formatDate }
+const FormatFechaCorta = (fechaISO) => {
+  return new Date(fechaISO).toLocaleDateString('es-PE', { timeZone: 'UTC' });
+};
+
+export { formatDate, FormatFechaCorta }
