@@ -1,16 +1,18 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAuthStore } from "../stores/auth";
+
 import Login from "../components/Login.vue";
 import Dashboard from "../components/Dashboard.vue";
-import authService from "../services/authService";
 import Prestamos from "../views/PrestamosRealizados.vue";
-import MaterialesAsignados from "../views/MaterialesAsignados.vue";
 import PrestamosRecibidos from "../views/PrestamosRecibidos.vue";
+import MaterialesAsignados from "../views/MaterialesAsignados.vue";
 
 const routes = [
   {
     path: "/login",
     name: "Login",
     component: Login,
+    meta: { guestOnly: true },
   },
   {
     path: "/dashboard",
@@ -20,19 +22,19 @@ const routes = [
   },
   {
     path: "/prestamos",
-    name: "Prestamo",
+    name: "Prestamos",
     component: Prestamos,
     meta: { requiresAuth: true },
   },
   {
     path: "/prestamos-recibidos",
-    name: "PrestamoRecibidos",
+    name: "PrestamosRecibidos",
     component: PrestamosRecibidos,
     meta: { requiresAuth: true },
   },
   {
     path: "/productos-asignados",
-    name: "Productos-Asignados",
+    name: "ProductosAsignados",
     component: MaterialesAsignados,
     meta: { requiresAuth: true },
   },
@@ -47,10 +49,15 @@ const router = createRouter({
   routes,
 });
 
-// Guard global
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !authService.isAuthenticated()) {
-    next("/login");
+  const authStore = useAuthStore();
+
+  authStore.checkSession();
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: "Login" });
+  } else if (to.meta.guestOnly && authStore.isAuthenticated) {
+    next({ name: "Dashboard" });
   } else {
     next();
   }
