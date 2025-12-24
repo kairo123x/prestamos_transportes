@@ -1,133 +1,345 @@
 <template>
-  <div class="crud-container">
-    <div class="page-layout">
-      <header class="page-header">
-        <div class="page-title-block">
-          <h2>Materiales asignados</h2>
-          <p class="page-subtitle">
-            Visualice y gestione los materiales asignados al personal de transporte.
-          </p>
+  <div class="view-wrapper">
+    <div class="view-container">
+      <!-- Header Section -->
+      <header class="view-header">
+        <div class="header-content">
+          <div class="header-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+              <path d="m3.3 7 8.7 5 8.7-5"/>
+              <path d="M12 22V12"/>
+            </svg>
+          </div>
+          <div class="header-text">
+            <h1>Materiales Asignados</h1>
+            <p>Visualice y gestione los materiales asignados al personal de transporte</p>
+          </div>
         </div>
-        <div class="page-actions">
-          <button class="btn-primary" @click="openModal()">Asignar material</button>
+        <div class="header-actions">
+          <button class="btn-primary" @click="openModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14"/>
+              <path d="M5 12h14"/>
+            </svg>
+            Asignar material
+          </button>
         </div>
       </header>
 
-      <section class="page-card">
-        <div class="card-header">
+      <!-- Table Card -->
+      <section class="table-card">
+        <div class="table-card-header">
           <h3>Listado de materiales</h3>
+          <span class="record-count">{{ materialesAsignados.length }} registros</span>
         </div>
-        <div class="card-body table-wrapper">
+        <div class="table-card-body">
           <el-table
             :data="materialesAsignados"
             style="width: 100%"
-            stripe
-            border
-            highlight-current-row
             :header-cell-style="{
-              backgroundColor: '#2563eb', 
+              backgroundColor: '#1e40af', 
               color: 'white',
-              fontWeight: 'bold',
-              fontSize: '13px'
+              fontWeight: '600',
+              fontSize: '12px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              padding: '16px 12px'
             }"
-            :cell-style="{ color: '#1f2933', fontSize: '13px' }"
+            :cell-style="{ 
+              color: '#334155', 
+              fontSize: '14px',
+              padding: '16px 12px'
+            }"
+            :row-class-name="tableRowClassName"
+            class="custom-table"
           >
-            <el-table-column prop="idMaterialAsignado" label="Id" width="120" />
-            <el-table-column prop="dni" label="DNI" width="120" />
-            <el-table-column prop="codEmpresa" label="Empresa" width="110" />
-            <el-table-column prop="tipoProducto" label="Tipo" width="140" />
-            <el-table-column prop="codProducto" label="Código" width="150" />
-            <el-table-column prop="cantidad" label="Cantidad" width="120" />
-            <el-table-column prop="fechaAsignado" label="Fecha asignada" width="160"> 
+            <el-table-column prop="idMaterialAsignado" label="ID" width="100">
               <template #default="scope">
-                {{ formatDate(scope.row.fechaAsignada) }}
+                <span class="id-badge">#{{ scope.row.idMaterialAsignado }}</span>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="dni" label="DNI" width="130">
+              <template #default="scope">
+                <div class="dni-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <span>{{ scope.row.dni }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="codEmpresa" label="Empresa" width="110">
+              <template #default="scope">
+                <span class="empresa-badge">{{ scope.row.codEmpresa }}</span>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="tipoProducto" label="Tipo" width="140">
+              <template #default="scope">
+                <span class="tipo-badge">{{ scope.row.tipoProducto }}</span>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="codProducto" label="Código Producto" min-width="160">
+              <template #default="scope">
+                <div class="producto-cell">
+                  <span class="producto-code">{{ scope.row.codProducto }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="cantidad" label="Cantidad" width="120" align="center">
+              <template #default="scope">
+                <span class="cantidad-badge" :class="{ 'low-stock': scope.row.cantidad <= 2 }">
+                  {{ scope.row.cantidad }} uds
+                </span>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="fechaAsignado" label="Fecha Asignada" width="180">
+              <template #default="scope">
+                <div class="fecha-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                    <line x1="16" x2="16" y1="2" y2="6"/>
+                    <line x1="8" x2="8" y1="2" y2="6"/>
+                    <line x1="3" x2="21" y1="10" y2="10"/>
+                  </svg>
+                  <span>{{ formatDate(scope.row.fechaAsignada) }}</span>
+                </div>
               </template>
             </el-table-column>
 
-            <el-table-column label="Acciones" width="150" :fixed="isMobile ? false : 'right'">
+            <el-table-column label="Acciones" width="140" :fixed="isMobile ? false : 'right'" align="center">
               <template #default="scope">
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="openConsumirModal(scope.row)"
-                >
+                <button class="btn-consumir" @click="openConsumirModal(scope.row)">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"/>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
                   Consumir
-                </el-button>
+                </button>
               </template>
             </el-table-column>
           </el-table>
         </div>
       </section>
+
+      <!-- Modal Asignar Material -->
+      <el-dialog 
+        v-model="showModal" 
+        :width="dialogWidth"
+        :show-close="false"
+        class="custom-dialog"
+      >
+        <template #header>
+          <div class="dialog-header">
+            <div class="dialog-header-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                <path d="m3.3 7 8.7 5 8.7-5"/>
+                <path d="M12 22V12"/>
+              </svg>
+            </div>
+            <div class="dialog-header-text">
+              <h3>Asignar Material</h3>
+              <p>Complete los datos para asignar un nuevo material</p>
+            </div>
+            <button class="dialog-close-btn" @click="showModal = false">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </div>
+        </template>
+
+        <div class="dialog-body">
+          <div class="form-section">
+            <div class="form-group">
+              <label class="form-label">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Trabajador
+              </label>
+              <el-select
+                v-model="formNuevaAsignacion.dni"
+                filterable
+                placeholder="Buscar trabajador por nombre..."
+                class="custom-select"
+              >
+                <el-option
+                  v-for="item in listaTrabajadores"
+                  :key="item.TRAB_DNI"
+                  :label="item.TRAB_NOMBRES+' '+item.TRAB_APELLPAT+' '+item.TRAB_APELLMAT"
+                  :value="item.TRAB_DNI"
+                />
+              </el-select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+                  <line x1="16" x2="16" y1="2" y2="6"/>
+                  <line x1="8" x2="8" y1="2" y2="6"/>
+                  <line x1="3" x2="21" y1="10" y2="10"/>
+                </svg>
+                DNI
+              </label>
+              <el-input 
+                v-model="formNuevaAsignacion.dni" 
+                disabled 
+                placeholder="Se autocompleta al seleccionar trabajador"
+                class="custom-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                </svg>
+                Producto
+              </label>
+              <el-select
+                v-model="productoSeleccionado"
+                filterable
+                remote
+                reserve-keyword
+                placeholder="Escriba para buscar producto..."
+                :remote-method="loadProductos"
+                :loading="loadingProductos"
+                class="custom-select"
+              >
+                <el-option
+                  v-for="item in listaProductos"
+                  :key="item"
+                  :label="item.NOMBRE"
+                  :value="item"
+                />
+              </el-select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                Cantidad
+              </label>
+              <el-input-number 
+                v-model="formNuevaAsignacion.cantidad" 
+                :min="1" 
+                :max="10" 
+                class="custom-input-number"
+              />
+            </div>
+          </div>
+        </div>
+
+        <template #footer>
+          <div class="dialog-footer">
+            <button class="btn-cancel" @click="showModal = false">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+              Cancelar
+            </button>
+            <button class="btn-save" @click="guardarAsignacionMaterial">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Guardar Material
+            </button>
+          </div>
+        </template>
+      </el-dialog>
+
+      <!-- Modal Consumir Material -->
+      <el-dialog 
+        v-model="showConsumirModal" 
+        :width="dialogWidth"
+        :show-close="false"
+        class="custom-dialog"
+      >
+        <template #header>
+          <div class="dialog-header consume-header">
+            <div class="dialog-header-icon consume-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                <line x1="10" x2="10" y1="11" y2="17"/>
+                <line x1="14" x2="14" y1="11" y2="17"/>
+              </svg>
+            </div>
+            <div class="dialog-header-text">
+              <h3>Consumir Material</h3>
+              <p>Ingrese la cantidad a consumir del material seleccionado</p>
+            </div>
+            <button class="dialog-close-btn" @click="showConsumirModal = false">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </div>
+        </template>
+
+        <div class="dialog-body">
+          <div class="consume-info" v-if="materialSeleccionado">
+            <div class="info-badge">
+              <span class="info-label">Stock disponible:</span>
+              <span class="info-value">{{ materialSeleccionado.cantidad }} unidades</span>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <div class="form-group">
+              <label class="form-label">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                Cantidad a consumir
+              </label>
+              <el-input-number 
+                v-model="cantidadConsumida" 
+                :min="0" 
+                :max="materialSeleccionado?.cantidad || 0"
+                class="custom-input-number"
+              />
+            </div>
+          </div>
+        </div>
+
+        <template #footer>
+          <div class="dialog-footer">
+            <button class="btn-cancel" @click="showConsumirModal = false">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+              Cancelar
+            </button>
+            <button class="btn-consume" @click="confirmarConsumoMaterial">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Confirmar Consumo
+            </button>
+          </div>
+        </template>
+      </el-dialog>
     </div>
-
-    <!-- Modal -->
-    <el-dialog v-model="showModal" title="Asignar Material" :width="dialogWidth">
-      <el-form :model="form">
-        <el-form-item label="Trabajador" :label-width="formLabelWidth">
-          <el-select
-            v-model="formNuevaAsignacion.dni"
-            filterable
-            placeholder="Buscar trabajador"
-          >
-            <el-option
-              v-for="item in listaTrabajadores"
-              :key="item.TRAB_DNI"
-              :label="item.TRAB_NOMBRES+' '+item.TRAB_APELLPAT+' '+item.TRAB_APELLMAT"
-              :value="item.TRAB_DNI"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="DNI" :label-width="formLabelWidth">
-          <el-input v-model="formNuevaAsignacion.dni" autocomplete="off" disabled />
-        </el-form-item>
-        <el-form-item label="Producto" :label-width="formLabelWidth">
-          <el-select
-            v-model="productoSeleccionado"
-            filterable
-            remote
-            reserve-keyword
-            placeholder="Buscar producto"
-            :remote-method="loadProductos"
-            :loading="loadingProductos"
-          >
-            <el-option
-              v-for="item in listaProductos"
-              :key="item"
-              :label="item.NOMBRE"
-              :value="item"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Cantidad" :label-width="formLabelWidth">
-          <el-input-number v-model="formNuevaAsignacion.cantidad" :min="1" :max="10" @change="handleChange" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="showModal = false">Cancel</el-button>
-          <el-button type="primary" @click="guardarAsignacionMaterial">
-            Guardar
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
-
-    <!-- Modal Consumir Modal -->
-    <el-dialog v-model="showConsumirModal" title="Consumir Material" :width="dialogWidth">
-      <el-form :model="form">
-        <el-form-item label="Cantidad" :label-width="formLabelWidth">
-          <el-input-number v-model="cantidadConsumida" :min="0" :max="materialSeleccionado.cantidad" @change="handleChange" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="showModal = false">Cancel</el-button>
-          <el-button type="primary" @click="confirmarConsumoMaterial">
-            Confirmar Consumo
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -143,6 +355,10 @@ const isMobile = ref(window.innerWidth < 768);
 
 const handleResize = () => {
   isMobile.value = window.innerWidth < 768;
+};
+
+const tableRowClassName = ({ rowIndex }) => {
+  return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
 };
 
 const formNuevaAsignacion = ref({
@@ -330,140 +546,628 @@ const confirmarConsumoMaterial = async(item) => {
 </script>
 
 <style scoped>
-.crud-container {
-  min-height: 100vh;
-  padding: 24px;
-  background: radial-gradient(circle at top left, #e5edff 0, #edf2ff 45%, #e5e7eb 100%);
-  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* ===== Layout Principal ===== */
+.view-wrapper {
+  min-height: calc(100vh - 74px);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 32px;
 }
 
-.page-layout {
-  width: 100%;
-  max-width: 100%;
+.view-container {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.page-header {
+/* ===== Header Section ===== */
+.view-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.page-title-block {
+.header-content {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 20px;
 }
 
-h2 {
-  font-size: 22px;
-  font-weight: 600;
-  color: #1f2933;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: #4b5563;
-}
-
-.page-actions {
+.header-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.header-icon svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.header-text h1 {
+  color: #0f172a;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.header-text p {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #0066cc, #004c99);
-  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
   border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  margin-bottom: 16px;
-  font-size: 14px;
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0, 102, 204, 0.28);
-  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.1s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary svg {
+  width: 18px;
+  height: 18px;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #005bb5, #004280);
-  box-shadow: 0 4px 12px rgba(0, 90, 180, 0.35);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 90, 180, 0.25);
 }
 
-.el-table {
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(15, 35, 52, 0.06);
-  padding: 4px 0 12px 0;
+/* ===== Table Card ===== */
+.table-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
+.table-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
 }
 
-.page-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
-  border: 1px solid #e5e7eb;
-}
-
-.card-header {
-  padding: 14px 18px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.card-header h3 {
+.table-card-header h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 1rem;
   font-weight: 600;
-  color: #111827;
+  color: #0f172a;
 }
 
-.card-body {
+.record-count {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.table-card-body {
   padding: 0;
+  overflow-x: auto;
 }
 
-.el-table__header th {
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.el-table__row:hover {
-  background-color: #f0f5ff !important;
-  transition: background-color 0.25s ease;
-}
-
-.el-button {
-  border-radius: 6px;
+/* ===== Custom Table Cells ===== */
+.id-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  color: #3730a3;
+  border-radius: 8px;
+  font-weight: 700;
   font-size: 13px;
 }
 
-.dialog-footer {
-  padding-top: 8px;
+.dni-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+.dni-cell svg {
+  width: 18px;
+  height: 18px;
+  color: #64748b;
+}
+
+.dni-cell span {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.empresa-badge {
+  display: inline-flex;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.tipo-badge {
+  display: inline-flex;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.producto-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.producto-code {
+  font-weight: 600;
+  color: #0f172a;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 13px;
+}
+
+.cantidad-badge {
+  display: inline-flex;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #047857;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.cantidad-badge.low-stock {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #dc2626;
+}
+
+.fecha-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fecha-cell svg {
+  width: 16px;
+  height: 16px;
+  color: #3b82f6;
+}
+
+.fecha-cell span {
+  font-size: 13px;
+  color: #475569;
+}
+
+.btn-consumir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-consumir svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-consumir:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* ===== Element Plus Table Override ===== */
+:deep(.custom-table) {
+  border: none !important;
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+}
+
+:deep(.custom-table .el-table__header-wrapper) {
+  border-radius: 0;
+}
+
+:deep(.custom-table .el-table__body-wrapper) {
+  border-radius: 0 0 16px 16px;
+}
+
+:deep(.custom-table .even-row) {
+  background-color: #ffffff;
+}
+
+:deep(.custom-table .odd-row) {
+  background-color: #f8fafc;
+}
+
+:deep(.custom-table .el-table__row:hover > td) {
+  background-color: #eff6ff !important;
+}
+
+:deep(.custom-table td.el-table__cell) {
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+:deep(.custom-table .el-table__cell) {
+  border-right: none !important;
+}
+.el-table {
+  --el-table-border-color: #e2e8f0;
+  --el-table-header-bg-color: #1d4ed8;
+  font-size: 14px;
+}
+
+:deep(.el-table__header th) {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 12px;
+}
+
+:deep(.el-table__row:hover > td) {
+  background-color: #f0f9ff !important;
+}
+
+:deep(.el-button--primary) {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: none;
+  border-radius: 8px;
+}
+
+:deep(.el-button--primary:hover) {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+}
+
+/* ===== Dialog Styling ===== */
+:deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+:deep(.el-dialog__header) {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+:deep(.el-dialog__title) {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+:deep(.el-dialog__body) {
+  padding: 24px;
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 500;
+  color: #334155;
+}
+
+/* ===== Custom Dialog Styling ===== */
+:deep(.custom-dialog) {
+  border-radius: 20px !important;
+  overflow: hidden;
+}
+
+:deep(.custom-dialog .el-dialog__header) {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+:deep(.custom-dialog .el-dialog__body) {
+  padding: 0 !important;
+}
+
+:deep(.custom-dialog .el-dialog__footer) {
+  padding: 0 !important;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  color: white;
+  position: relative;
+}
+
+.consume-header {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+}
+
+.dialog-header-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dialog-header-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.dialog-header-text {
+  flex: 1;
+}
+
+.dialog-header-text h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.dialog-header-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.dialog-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.dialog-close-btn svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
+.dialog-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.dialog-body {
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-label svg {
+  width: 18px;
+  height: 18px;
+  color: #3b82f6;
+}
+
+.custom-select {
+  width: 100%;
+}
+
+:deep(.custom-select .el-input__wrapper) {
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 2px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+:deep(.custom-select .el-input__wrapper:hover) {
+  border-color: #cbd5e1;
+}
+
+:deep(.custom-select .el-input.is-focus .el-input__wrapper) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:deep(.custom-input .el-input__wrapper) {
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 2px solid #e2e8f0;
+  background: #f1f5f9;
+}
+
+:deep(.custom-input-number) {
+  width: 100%;
+}
+
+:deep(.custom-input-number .el-input__wrapper) {
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 2px solid #e2e8f0;
+}
+
+:deep(.custom-input-number .el-input-number__decrease),
+:deep(.custom-input-number .el-input-number__increase) {
+  border-radius: 8px;
+}
+
+.consume-info {
+  margin-bottom: 20px;
+}
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #f59e0b;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #78350f;
+  font-weight: 700;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-cancel,
+.btn-save,
+.btn-consume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-cancel {
+  background: #f1f5f9;
+  color: #475569;
+  border: 2px solid #e2e8f0;
+}
+
+.btn-cancel:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-consume {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-consume:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.btn-cancel svg,
+.btn-save svg,
+.btn-consume svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .crud-container {
-    padding: 12px;
+  .view-wrapper {
+    padding: 20px 16px;
   }
 
-  h2 {
-    font-size: 18px;
-    text-align: center;
+  .view-header {
+    flex-direction: column;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-text h1 {
+    font-size: 1.4rem;
+  }
+
+  .header-actions {
+    width: 100%;
   }
 
   .btn-primary {
@@ -471,26 +1175,15 @@ h2 {
     justify-content: center;
   }
 
-  .page-header {
+  .table-card-header {
+    padding: 16px;
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
+    gap: 12px;
   }
 
-  .page-actions {
-    justify-content: flex-start;
-  }
-
-  .page-layout {
-    max-width: 100%;
-  }
-
-  .page-card {
-    border-radius: 10px;
-  }
-
-  .card-body {
-    padding: 8px 10px 10px 10px;
+  .table-card-body {
+    padding: 0;
   }
 }
-
 </style>
