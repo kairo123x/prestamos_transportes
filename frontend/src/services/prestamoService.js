@@ -1,8 +1,6 @@
 import apiClient from "./interceptor";
 
-const API_URL = import.meta.env.VITE_API_URL || 'localhost:3000';
-
-const rutaGeneral = API_URL+'/prestamos';
+const rutaGeneral = '/prestamos';
 
 export const listarProductos = async (search) => {
     try {
