@@ -277,7 +277,7 @@ const aprobarRecepcionPrestamo = async (item) => {
 /* ===== Layout Principal ===== */
 .view-wrapper {
   min-height: calc(100vh - 74px);
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-gray-200) 100%);
   padding: 32px;
 }
 
@@ -305,23 +305,23 @@ const aprobarRecepcionPrestamo = async (item) => {
 .header-icon {
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
   border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-glow-accent);
 }
 
 .header-icon svg {
   width: 28px;
   height: 28px;
-  color: white;
+  color: var(--color-primary);
 }
 
 .header-text h1 {
-  color: #0f172a;
+  color: var(--color-primary);
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0 0 6px 0;
@@ -329,16 +329,16 @@ const aprobarRecepcionPrestamo = async (item) => {
 }
 
 .header-text p {
-  color: #64748b;
+  color: var(--color-gray-500);
   font-size: 0.95rem;
   margin: 0;
 }
 
 /* ===== Table Card ===== */
 .table-card {
-  background: white;
+  background: var(--color-white);
   border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
   border: 1px solid rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
@@ -348,24 +348,24 @@ const aprobarRecepcionPrestamo = async (item) => {
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border-bottom: 1px solid var(--color-gray-200);
+  background: linear-gradient(135deg, var(--color-gray-50), var(--color-gray-100));
 }
 
 .table-card-header h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-primary);
 }
 
 .record-count {
-  background: #d1fae5;
-  color: #047857;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .table-card-body {
@@ -383,24 +383,24 @@ const aprobarRecepcionPrestamo = async (item) => {
 .dni-cell svg {
   width: 18px;
   height: 18px;
-  color: #64748b;
+  color: var(--color-gray-500);
 }
 
 .dni-cell.receptor svg {
-  color: #10b981;
+  color: var(--color-accent-dark);
 }
 
 .dni-cell span {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-primary);
 }
 
 .producto-code {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-primary);
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: 13px;
-  background: #f1f5f9;
+  background: var(--color-gray-100);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -408,18 +408,18 @@ const aprobarRecepcionPrestamo = async (item) => {
 .tipo-badge {
   display: inline-flex;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  color: #92400e;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
 }
 
 .empresa-badge {
   display: inline-flex;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  color: #1e40af;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-dark));
+  color: var(--color-white);
   border-radius: 8px;
   font-weight: 600;
   font-size: 13px;
@@ -441,23 +441,23 @@ const aprobarRecepcionPrestamo = async (item) => {
 }
 
 .status-badge.approved {
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-  color: #047857;
+  background: linear-gradient(135deg, var(--color-success-light), #a7f3d0);
+  color: var(--color-success);
 }
 
 .status-badge.pending {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  color: #92400e;
+  background: linear-gradient(135deg, var(--color-accent-light), var(--color-accent));
+  color: var(--color-primary);
 }
 
 .status-badge.returned {
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  background: linear-gradient(135deg, var(--color-info-light), #bfdbfe);
   color: #1e40af;
 }
 
 .status-badge.not-returned {
-  background: linear-gradient(135deg, #fee2e2, #fecaca);
-  color: #dc2626;
+  background: linear-gradient(135deg, var(--color-error-light), #fecaca);
+  color: var(--color-error);
 }
 
 .fecha-cell {
@@ -469,12 +469,12 @@ const aprobarRecepcionPrestamo = async (item) => {
 .fecha-cell svg {
   width: 16px;
   height: 16px;
-  color: #10b981;
+  color: var(--color-accent-dark);
 }
 
 .fecha-cell span {
   font-size: 13px;
-  color: #475569;
+  color: var(--color-gray-600);
 }
 
 .btn-aprobar {
@@ -482,15 +482,15 @@ const aprobarRecepcionPrestamo = async (item) => {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
   border: none;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-glow-accent);
 }
 
 .btn-aprobar svg {
@@ -500,7 +500,7 @@ const aprobarRecepcionPrestamo = async (item) => {
 
 .btn-aprobar:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 4px 12px rgba(255, 205, 0, 0.5);
 }
 
 .btn-devolver {

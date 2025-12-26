@@ -94,7 +94,13 @@
             
             <el-table-column prop="cantidad" label="Cantidad" width="120" align="center">
               <template #default="scope">
-                <span class="cantidad-badge" :class="{ 'low-stock': scope.row.cantidad <= 2 }">
+                <span 
+                  class="cantidad-badge" 
+                  :class="{ 
+                    'low-stock': scope.row.cantidad > 0 && scope.row.cantidad <= 2,
+                    'out-of-stock': scope.row.cantidad === 0 
+                  }"
+                >
                   {{ scope.row.cantidad }} uds
                 </span>
               </template>
@@ -116,7 +122,11 @@
 
             <el-table-column label="Acciones" width="140" :fixed="isMobile ? false : 'right'" align="center">
               <template #default="scope">
-                <button class="btn-consumir" @click="openConsumirModal(scope.row)">
+                <button 
+                  v-if="scope.row.cantidad > 0"
+                  class="btn-consumir" 
+                  @click="openConsumirModal(scope.row)"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18"/>
                     <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
@@ -124,6 +134,13 @@
                   </svg>
                   Consumir
                 </button>
+                <span v-else class="stock-agotado">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="4.93" x2="19.07" y1="4.93" y2="19.07"/>
+                  </svg>
+                  Agotado
+                </span>
               </template>
             </el-table-column>
           </el-table>
@@ -357,7 +374,10 @@ const handleResize = () => {
   isMobile.value = window.innerWidth < 768;
 };
 
-const tableRowClassName = ({ rowIndex }) => {
+const tableRowClassName = ({ row, rowIndex }) => {
+  if (row.cantidad === 0) {
+    return 'out-of-stock-row';
+  }
   return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
 };
 
@@ -376,7 +396,7 @@ const materialSeleccionado = ref();
 
 const cantidadConsumida = ref(0);
 
-const dialogWidth = ref('30%');
+const dialogWidth = ref('600px');
 
 onMounted(async()=> {
   window.addEventListener('resize', handleResize);
@@ -685,8 +705,8 @@ const confirmarConsumoMaterial = async(item) => {
   display: inline-flex;
   align-items: center;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-  color: #3730a3;
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  color: var(--color-white);
   border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
@@ -701,19 +721,19 @@ const confirmarConsumoMaterial = async(item) => {
 .dni-cell svg {
   width: 18px;
   height: 18px;
-  color: #64748b;
+  color: var(--color-gray-500);
 }
 
 .dni-cell span {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-primary);
 }
 
 .empresa-badge {
   display: inline-flex;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  color: #1e40af;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-dark));
+  color: var(--color-white);
   border-radius: 8px;
   font-weight: 600;
   font-size: 13px;
@@ -722,10 +742,10 @@ const confirmarConsumoMaterial = async(item) => {
 .tipo-badge {
   display: inline-flex;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  color: #92400e;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
 }
 
@@ -737,7 +757,7 @@ const confirmarConsumoMaterial = async(item) => {
 
 .producto-code {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-primary);
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: 13px;
 }
@@ -745,16 +765,38 @@ const confirmarConsumoMaterial = async(item) => {
 .cantidad-badge {
   display: inline-flex;
   padding: 8px 14px;
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-  color: #047857;
+  background: linear-gradient(135deg, var(--color-success-light), #a7f3d0);
+  color: var(--color-success);
   border-radius: 20px;
   font-weight: 700;
   font-size: 14px;
 }
 
 .cantidad-badge.low-stock {
-  background: linear-gradient(135deg, #fee2e2, #fecaca);
-  color: #dc2626;
+  background: linear-gradient(135deg, var(--color-error-light), #fecaca);
+  color: var(--color-error);
+}
+
+.cantidad-badge.out-of-stock {
+  background: linear-gradient(135deg, var(--color-gray-200), var(--color-gray-300));
+  color: var(--color-gray-500);
+}
+
+.stock-agotado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, var(--color-gray-200), var(--color-gray-300));
+  color: var(--color-gray-500);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stock-agotado svg {
+  width: 16px;
+  height: 16px;
 }
 
 .fecha-cell {
@@ -766,12 +808,12 @@ const confirmarConsumoMaterial = async(item) => {
 .fecha-cell svg {
   width: 16px;
   height: 16px;
-  color: #3b82f6;
+  color: var(--color-accent-dark);
 }
 
 .fecha-cell span {
   font-size: 13px;
-  color: #475569;
+  color: var(--color-gray-600);
 }
 
 .btn-consumir {
@@ -779,15 +821,15 @@ const confirmarConsumoMaterial = async(item) => {
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
   border: none;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  box-shadow: var(--shadow-glow-accent);
 }
 
 .btn-consumir svg {
@@ -797,7 +839,7 @@ const confirmarConsumoMaterial = async(item) => {
 
 .btn-consumir:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 4px 12px rgba(255, 205, 0, 0.5);
 }
 
 /* ===== Element Plus Table Override ===== */
@@ -816,11 +858,24 @@ const confirmarConsumoMaterial = async(item) => {
 }
 
 :deep(.custom-table .even-row) {
-  background-color: #ffffff;
+  background-color: var(--color-white);
 }
 
 :deep(.custom-table .odd-row) {
-  background-color: #f8fafc;
+  background-color: var(--color-gray-50);
+}
+
+:deep(.custom-table .out-of-stock-row) {
+  background-color: var(--color-gray-100) !important;
+  opacity: 0.7;
+}
+
+:deep(.custom-table .out-of-stock-row > td) {
+  color: #94a3b8 !important;
+}
+
+:deep(.custom-table .out-of-stock-row:hover > td) {
+  background-color: #e2e8f0 !important;
 }
 
 :deep(.custom-table .el-table__row:hover > td) {
@@ -908,22 +963,22 @@ const confirmarConsumoMaterial = async(item) => {
 .dialog-header {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  padding: 24px;
-  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  gap: 20px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: white;
   position: relative;
 }
 
 .consume-header {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
 }
 
 .dialog-header-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -931,8 +986,8 @@ const confirmarConsumoMaterial = async(item) => {
 }
 
 .dialog-header-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: white;
 }
 
@@ -941,14 +996,14 @@ const confirmarConsumoMaterial = async(item) => {
 }
 
 .dialog-header-text h3 {
-  margin: 0 0 4px 0;
-  font-size: 1.25rem;
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
   font-weight: 700;
 }
 
 .dialog-header-text p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   opacity: 0.9;
 }
 
@@ -980,35 +1035,35 @@ const confirmarConsumoMaterial = async(item) => {
 }
 
 .dialog-body {
-  padding: 24px;
-  background: #f8fafc;
+  padding: 36px 40px;
+  background: var(--color-gray-50);
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 28px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .form-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 12px;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--color-gray-700);
 }
 
 .form-label svg {
-  width: 18px;
-  height: 18px;
-  color: #3b82f6;
+  width: 22px;
+  height: 22px;
+  color: var(--color-accent);
 }
 
 .custom-select {
@@ -1016,28 +1071,30 @@ const confirmarConsumoMaterial = async(item) => {
 }
 
 :deep(.custom-select .el-input__wrapper) {
-  border-radius: 10px;
-  padding: 8px 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  border: 2px solid #e2e8f0;
+  border-radius: var(--border-radius-md);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-gray-200);
   transition: all 0.2s ease;
+  font-size: 1.05rem;
 }
 
 :deep(.custom-select .el-input__wrapper:hover) {
-  border-color: #cbd5e1;
+  border-color: var(--color-gray-300);
 }
 
 :deep(.custom-select .el-input.is-focus .el-input__wrapper) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(245, 169, 107, 0.15);
 }
 
 :deep(.custom-input .el-input__wrapper) {
-  border-radius: 10px;
-  padding: 8px 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  border: 2px solid #e2e8f0;
-  background: #f1f5f9;
+  border-radius: var(--border-radius-md);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-gray-200);
+  background: var(--color-gray-100);
+  font-size: var(--font-size-base);
 }
 
 :deep(.custom-input-number) {
@@ -1045,10 +1102,16 @@ const confirmarConsumoMaterial = async(item) => {
 }
 
 :deep(.custom-input-number .el-input__wrapper) {
-  border-radius: 10px;
-  padding: 8px 12px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  border: 2px solid #e2e8f0;
+  border-radius: var(--border-radius-md);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-gray-200);
+  font-size: 1.1rem;
+}
+
+:deep(.custom-input-number .el-input__inner) {
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 :deep(.custom-input-number .el-input-number__decrease),
@@ -1085,10 +1148,10 @@ const confirmarConsumoMaterial = async(item) => {
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 20px 24px;
-  background: white;
-  border-top: 1px solid #e2e8f0;
+  gap: 16px;
+  padding: 24px 32px;
+  background: var(--color-white);
+  border-top: 1px solid var(--color-gray-200);
 }
 
 .btn-cancel,
@@ -1096,10 +1159,10 @@ const confirmarConsumoMaterial = async(item) => {
 .btn-consume {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 0.95rem;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1107,36 +1170,38 @@ const confirmarConsumoMaterial = async(item) => {
 }
 
 .btn-cancel {
-  background: #f1f5f9;
-  color: #475569;
-  border: 2px solid #e2e8f0;
+  background: var(--color-gray-100);
+  color: var(--color-gray-600);
+  border: 2px solid var(--color-gray-200);
 }
 
 .btn-cancel:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+  background: var(--color-gray-200);
+  border-color: var(--color-gray-300);
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-glow-accent);
 }
 
 .btn-save:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 205, 0, 0.5);
 }
 
 .btn-consume {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
+  font-weight: 700;
+  box-shadow: var(--shadow-glow-accent);
 }
 
 .btn-consume:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 205, 0, 0.5);
 }
 
 .btn-cancel svg,

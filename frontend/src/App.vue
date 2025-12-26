@@ -135,15 +135,19 @@ const closeMenu = () => {
   showMenu.value = false
 }
 
-const handleLogout = () => {
+const handleLogout = async () => {
   auth.logout();
-  auth.checkSession()
-  showMenu.value = false
-  router.push('/login')
+  showMenu.value = false;
+  await router.push('/login');
+  window.location.reload();
 }
 </script>
 
 <style>
+/* Importar variables CSS globales */
+@import './assets/styles/variables.css';
+
+/* ===== ESTILOS BASE GLOBALES ===== */
 * {
   margin: 0;
   padding: 0;
@@ -151,8 +155,13 @@ const handleLogout = () => {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #edf2f7;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  color: var(--color-gray-700);
+  background: var(--color-gray-100);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
@@ -161,16 +170,16 @@ body {
 
 .dashboard-container {
   min-height: 100vh;
-  background: #f3f4f6;
+  background: var(--color-gray-100);
   display: flex;
   flex-direction: column;
 }
 
 /* Navbar */
 .navbar {
-  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 40%, #1e40af 100%);
-  color: #f9fafb;
-  padding: 15px 20px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-white);
+  padding: var(--spacing-md) var(--spacing-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -607,5 +616,213 @@ body {
   .btn-logout-sidebar .icon {
     font-size: 1rem;
   }
+}
+
+/* ===== Element Plus MessageBox Custom Styles ===== */
+.el-message-box {
+  width: 480px !important;
+  max-width: 92vw !important;
+  border-radius: var(--border-radius-xl) !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-xl) !important;
+  border: none !important;
+  font-family: var(--font-family) !important;
+}
+
+.el-message-box__header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%) !important;
+  padding: var(--spacing-lg) var(--spacing-xl) !important;
+  border-bottom: none !important;
+}
+
+.el-message-box__title {
+  color: var(--color-white) !important;
+  font-size: var(--font-size-xl) !important;
+  font-weight: 700 !important;
+  font-family: var(--font-family) !important;
+  letter-spacing: 0.3px !important;
+}
+
+.el-message-box__headerbtn {
+  top: 20px !important;
+  right: 20px !important;
+  width: 36px !important;
+  height: 36px !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: var(--border-radius-sm) !important;
+  transition: all 0.2s ease !important;
+}
+
+.el-message-box__headerbtn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.el-message-box__headerbtn .el-message-box__close {
+  color: var(--color-white) !important;
+  font-size: 18px !important;
+}
+
+.el-message-box__content {
+  padding: var(--spacing-xl) !important;
+  background: var(--color-gray-50) !important;
+}
+
+.el-message-box__message {
+  font-size: var(--font-size-lg) !important;
+  color: var(--color-primary) !important;
+  line-height: 1.7 !important;
+  font-family: var(--font-family) !important;
+}
+
+.el-message-box__message p {
+  margin: 0 !important;
+}
+
+.el-message-box__status {
+  font-size: 32px !important;
+}
+
+.el-message-box__status.el-message-box-icon--warning {
+  color: var(--color-accent) !important;
+}
+
+.el-message-box__status.el-message-box-icon--success {
+  color: var(--color-success) !important;
+}
+
+.el-message-box__status.el-message-box-icon--error {
+  color: var(--color-error) !important;
+}
+
+.el-message-box__status.el-message-box-icon--info {
+  color: var(--color-primary-light) !important;
+}
+
+.el-message-box__btns {
+  padding: var(--spacing-lg) var(--spacing-xl) var(--spacing-xl) !important;
+  background: var(--color-gray-50) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: var(--spacing-md) !important;
+}
+
+.el-message-box__btns .el-button {
+  padding: 14px 28px !important;
+  border-radius: var(--border-radius-md) !important;
+  font-size: var(--font-size-base) !important;
+  font-weight: 600 !important;
+  font-family: var(--font-family) !important;
+  transition: all 0.2s ease !important;
+  min-width: 120px !important;
+}
+
+.el-message-box__btns .el-button--default {
+  background: var(--color-white) !important;
+  border: 2px solid var(--color-gray-200) !important;
+  color: var(--color-gray-600) !important;
+}
+
+.el-message-box__btns .el-button--default:hover {
+  background: var(--color-gray-100) !important;
+  border-color: var(--color-gray-300) !important;
+}
+
+.el-message-box__btns .el-button--primary {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%) !important;
+  border: none !important;
+  color: var(--color-primary) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(255, 205, 0, 0.4) !important;
+}
+
+.el-message-box__btns .el-button--primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 22px rgba(255, 205, 0, 0.5) !important;
+}
+
+/* ===== Element Plus Message (Toast) Custom Styles ===== */
+.el-message {
+  min-width: 380px !important;
+  padding: 18px 24px !important;
+  border-radius: var(--border-radius-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border: none !important;
+  font-family: var(--font-family) !important;
+}
+
+.el-message__content {
+  font-size: var(--font-size-base) !important;
+  font-weight: 500 !important;
+  color: var(--color-primary) !important;
+  line-height: 1.6 !important;
+}
+
+.el-message--success {
+  background: linear-gradient(135deg, var(--color-success-light) 0%, #a7f3d0 100%) !important;
+}
+
+.el-message--success .el-message__icon {
+  color: var(--color-success) !important;
+  font-size: 24px !important;
+}
+
+.el-message--warning {
+  background: linear-gradient(135deg, var(--color-warning-light) 0%, #fde68a 100%) !important;
+}
+
+.el-message--warning .el-message__icon {
+  color: var(--color-accent) !important;
+  font-size: 24px !important;
+}
+
+.el-message--error {
+  background: linear-gradient(135deg, var(--color-error-light) 0%, #fecaca 100%) !important;
+}
+
+.el-message--error .el-message__icon {
+  color: var(--color-error) !important;
+  font-size: 24px !important;
+}
+
+.el-message--info {
+  background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-gray-200) 100%) !important;
+}
+
+.el-message--info .el-message__icon {
+  color: var(--color-primary-light) !important;
+  font-size: 24px !important;
+}
+
+/* ===== Element Plus Input Number in MessageBox ===== */
+.el-message-box .el-input-number {
+  width: 100% !important;
+}
+
+.el-message-box .el-input-number .el-input__wrapper {
+  border-radius: var(--border-radius-md) !important;
+  padding: 12px 16px !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: 2px solid var(--color-gray-200) !important;
+  font-size: var(--font-size-lg) !important;
+}
+
+.el-message-box .el-input-number .el-input__wrapper:hover {
+  border-color: var(--color-accent) !important;
+}
+
+.el-message-box .el-input-number .el-input.is-focus .el-input__wrapper {
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 4px rgba(245, 169, 107, 0.2) !important;
+}
+
+.el-message-box .el-input-number .el-input__inner {
+  font-size: var(--font-size-xl) !important;
+  font-weight: 600 !important;
+}
+
+/* ===== Overlay ===== */
+.el-overlay {
+  background: rgba(45, 58, 79, 0.6) !important;
+  backdrop-filter: blur(6px) !important;
 }
 </style>
