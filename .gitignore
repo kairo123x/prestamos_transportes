@@ -35,3 +35,6 @@ tmp/
 temp/
 
 backend/node_modules/
+
+*/.env.*
+*/.env
