@@ -72,11 +72,11 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="codEmpresa" label="Empresa" width="110">
+            <!-- <el-table-column prop="codEmpresa" label="Empresa" width="110">
               <template #default="scope">
                 <span class="empresa-badge">{{ scope.row.codEmpresa }}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
             
             <el-table-column prop="tipoProducto" label="Tipo" width="140">
               <template #default="scope">
@@ -84,11 +84,17 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="codProducto" label="Código Producto" min-width="160">
+            <el-table-column prop="codProducto" label="Código Producto" width="120">
               <template #default="scope">
                 <div class="producto-cell">
                   <span class="producto-code">{{ scope.row.codProducto }}</span>
                 </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="descripcionProducto" label="Descripción" min-width="220">
+              <template #default="scope">
+                <span class="producto-code">{{ scope.row.descripcionProducto }}</span>
               </template>
             </el-table-column>
             
@@ -120,7 +126,7 @@
               </template>
             </el-table-column>
 
-            <el-table-column label="Acciones" width="140" :fixed="isMobile ? false : 'right'" align="center">
+            <el-table-column label="Acciones" width="150" :fixed="isMobile ? false : 'right'" align="center">
               <template #default="scope">
                 <button 
                   v-if="scope.row.cantidad > 0"

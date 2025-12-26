@@ -53,19 +53,7 @@
             :row-class-name="tableRowClassName"
             class="custom-table"
           >
-            <el-table-column prop="dniPrestador" label="DNI Prestador" width="150">
-              <template #default="scope">
-                <div class="dni-cell">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  <span>{{ scope.row.dniPrestador }}</span>
-                </div>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="dniRecepcionador" label="DNI Receptor" width="150">
+            <el-table-column prop="nombrePrestador" label="Prestador" width="150">
               <template #default="scope">
                 <div class="dni-cell receptor">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -74,28 +62,54 @@
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                   </svg>
-                  <span>{{ scope.row.dniRecepcionador }}</span>
+                  <span>{{ scope.row.nombrePrestador }}</span>
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="nombreRecepcionador" label="Receptor" width="150">
+              <template #default="scope">
+                <div class="dni-cell receptor">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                  <span>{{ scope.row.nombreRecepcionador }}</span>
                 </div>
               </template>
             </el-table-column>
             
-            <el-table-column prop="codProducto" label="Código" min-width="140">
-              <template #default="scope">
-                <span class="producto-code">{{ scope.row.codProducto }}</span>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="tipoProducto" label="Tipo" width="130">
+            <el-table-column prop="tipoProducto" label="Tipo" width="140">
               <template #default="scope">
                 <span class="tipo-badge">{{ scope.row.tipoProducto }}</span>
               </template>
             </el-table-column>
             
-            <el-table-column prop="codEmpresa" label="Empresa" width="100">
+            <el-table-column prop="codProducto" label="Código" width="150">
+              <template #default="scope">
+                <span class="producto-code">{{ scope.row.codProducto }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="descripcionProducto" label="Descripción" min-width="150">
+              <template #default="scope">
+                <span>{{ scope.row.descripcionProducto }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="cantidad" label="Cantidad" align="center" min-width="120">
+              <template #default="scope">
+                <span>{{ scope.row.cantidad }}</span>
+              </template>
+            </el-table-column>
+            
+            <!-- <el-table-column prop="codEmpresa" label="Empresa" width="100">
               <template #default="scope">
                 <span class="empresa-badge">{{ scope.row.codEmpresa }}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
             
             <el-table-column prop="prestamoEstado" label="Estado" width="160" align="center">
               <template #default="scope">
@@ -136,14 +150,14 @@
                 </button>
                 <button
                   class="btn-eliminar"
-                  @click="eliminar(scope.row)"
+                  @click="cancelar(scope.row)"
                   v-if="scope.row.prestamoAprobado==false && scope.row.devolverPrestamo==false"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
                     <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
                   </svg>
-                  Eliminar
+                  Cancelar
                 </button>
                 <span 
                   v-if="scope.row.devolucionConfirmada==true" 
@@ -293,7 +307,8 @@ import {
   listarTrabajadores, 
   PrestarMaterial, 
   listarMaterialesAsignados,
-  confirmarDevolucion
+  confirmarDevolucion,
+  cancelarPrestamo
 } from "../services/prestamoService"
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
@@ -339,13 +354,6 @@ const formPrestamoMaterial = ref({
   fechaPrestamo: ''
 });
 
-const productoSeleccionado = ref(null);
-
-const loans = ref([
-  { id: 1, material: "Laptop", cantidad: 2, solicitante: "Juan Pérez", fecha: "2025-12-10" },
-  { id: 2, material: "Proyector", cantidad: 1, solicitante: "María López", fecha: "2025-12-12" }
-])
-
 const showModal = ref(false)
 const editingLoan = ref(null)
 const form = ref({ id: null, material: "", cantidad: 1, solicitante: "", fecha: "" })
@@ -359,14 +367,6 @@ function openModal(loan = null) {
     form.value = { id: null, material: "", cantidad: 1, solicitante: "", fecha: "" }
   }
   showModal.value = true
-}
-
-function formatDate(date) {
-  return new Date(date).toLocaleDateString("es-PE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  })
 }
 
 const prestamos = ref([]);
@@ -500,29 +500,29 @@ const confirmarDevolucionMaterial = async(item) => {
   }
 };
 
-const eliminar = async(item) => {
+const cancelar = async(item) => {
   try {
-    await ElMessageBox.confirm(
-      `¿Está seguro que desea eliminar el préstamo Nº ${item.idPrestamo}? Esta acción no se puede deshacer.`,
-      'Confirmar eliminación',
+    const responseConfirmacion = await ElMessageBox.confirm(
+      `¿Está seguro que desea cancelar el préstamo Nº ${item.idPrestamo}? Esta acción no se puede deshacer.`,
+      'Confirmar cancelación de préstamo',
       {
-        confirmButtonText: 'Sí, eliminar',
-        cancelButtonText: 'Cancelar',
+        confirmButtonText: 'Sí, cancelar',
+        cancelButtonText: 'No, mantener',
         type: 'warning'
       }
     );
 
-    // TODO: Implementar servicio de eliminación cuando esté disponible en el backend
-    ElMessage.info('Funcionalidad de eliminación pendiente de implementar en el backend.');
-    // const response = await eliminarPrestamo(item.idPrestamo);
-    // if(response.data.success){
-    //   ElMessage.success('El préstamo fue eliminado correctamente.');
-    //   loadListaPrestamos();
-    // }
+      if(responseConfirmacion){
+        const response = await cancelarPrestamo(item.idPrestamo);
+        if(response.data.success){
+          ElMessage.success('El préstamo fue cancelado correctamente.');
+          loadListaPrestamos();
+        }
+      }
   } catch (error) {
     if (error !== 'cancel') {
-      console.log('Error al eliminar préstamo', error);
-      ElMessage.error('Ocurrió un error al eliminar el préstamo.');
+      console.log('Error al cancelar préstamo', error);
+      ElMessage.error('Ocurrió un error al cancelar el préstamo.');
     }
   }
 };

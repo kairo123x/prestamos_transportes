@@ -139,7 +139,24 @@ export const listarPrestamosRealizados = async (req, res) => {
   try {
     const { dniPrestador } = req.query;
 
-    const query = `select * from PrestamoMateriales where dniPrestador=@dniPrestador`;
+    const query = `
+    SELECT 
+          p.*,
+          m.descripcionProducto,
+          CONCAT(t1.TRAB_APELLPAT, ' ', t1.TRAB_APELLMAT, ' ', t1.TRAB_NOMBRES) AS nombrePrestador,
+          CONCAT(t2.TRAB_APELLPAT, ' ', t2.TRAB_APELLMAT, ' ', t2.TRAB_NOMBRES) AS nombreRecepcionador
+      FROM PrestamoMateriales p
+      INNER JOIN MaterialesAsignados m 
+          ON p.tipoProducto = m.tipoProducto 
+        AND p.codProducto = m.codProducto 
+        AND p.dniPrestador = m.dni
+      INNER JOIN RRHH_TRABAJADORES t1 
+          ON t1.TRAB_DNI = p.dniPrestador 
+        AND t1.TRAB_ESTADO = 1
+      INNER JOIN RRHH_TRABAJADORES t2 
+          ON t2.TRAB_DNI = p.dniRecepcionador 
+        AND t2.TRAB_ESTADO = 1
+      WHERE p.dniPrestador = @dniPrestador`;
 
     const params = {
       dniPrestador: dniPrestador
@@ -161,7 +178,24 @@ export const listarPrestamosRecibidos = async (req, res) => {
   try {
     const { dniRecepcionador } = req.query;
 
-    const query = `select * from PrestamoMateriales where dniRecepcionador=@dniRecepcionador`;
+    const query = `
+      SELECT 
+          p.*,
+          m.descripcionProducto,
+          CONCAT(t1.TRAB_APELLPAT, ' ', t1.TRAB_APELLMAT, ' ', t1.TRAB_NOMBRES) AS nombrePrestador,
+          CONCAT(t2.TRAB_APELLPAT, ' ', t2.TRAB_APELLMAT, ' ', t2.TRAB_NOMBRES) AS nombreRecepcionador
+      FROM PrestamoMateriales p
+      INNER JOIN MaterialesAsignados m 
+          ON p.tipoProducto = m.tipoProducto 
+        AND p.codProducto = m.codProducto 
+        AND p.dniPrestador = m.dni
+      INNER JOIN RRHH_TRABAJADORES t1 
+          ON t1.TRAB_DNI = p.dniPrestador 
+        AND t1.TRAB_ESTADO = 1
+      INNER JOIN RRHH_TRABAJADORES t2 
+          ON t2.TRAB_DNI = p.dniRecepcionador 
+        AND t2.TRAB_ESTADO = 1
+      WHERE dniRecepcionador=@dniRecepcionador`;
 
     const params = {
       dniRecepcionador: dniRecepcionador
@@ -183,7 +217,13 @@ export const prestarMaterial = async (req, res) => {
   try {
     const { dniPrestador, dniRecepcionador, codEmpresa, tipoProducto, codProducto, prestamoAprobado, devolverPrestamo, cantidad, fechaPrestamo } = req.body;
 
-    const query = `insert into PrestamoMateriales(dniPrestador, dniRecepcionador, codEmpresa, tipoProducto, codProducto, prestamoAprobado, devolverPrestamo, devolucionConfirmada, cantidad, fechaPrestamo) values (@dniPrestador, @dniRecepcionador, @codEmpresa, @tipoProducto, @codProducto, 0, 0, 0, @cantidad, @fechaPrestamo)`;
+    const query = `
+    insert into PrestamoMateriales(dniPrestador, dniRecepcionador, codEmpresa, tipoProducto, codProducto, prestamoAprobado, devolverPrestamo, devolucionConfirmada, cantidad, fechaPrestamo) 
+    values (@dniPrestador, @dniRecepcionador, @codEmpresa, @tipoProducto, @codProducto, 0, 0, 0, @cantidad, @fechaPrestamo)
+    
+    update MaterialesAsignados
+    set cantidad = cantidad - @cantidad
+    where dni = @dniPrestador and codEmpresa = @codEmpresa and tipoProducto = @tipoProducto and codProducto = @codProducto`;
 
     const params = {
       dniPrestador: dniPrestador,
@@ -195,6 +235,42 @@ export const prestarMaterial = async (req, res) => {
       devolverPrestamo: devolverPrestamo,
       cantidad: cantidad,
       fechaPrestamo: fechaPrestamo
+    }
+
+    const result = await executeQuery(configLogin, query, params);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
+  } catch (error) {
+    console.error("❌ Error en el controlador:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
+  }
+}
+
+export const cancelarPrestamo = async (req, res) => {
+  try {
+    const { idPrestamo } = req.body;
+
+    const query = `
+    UPDATE ma
+    SET ma.cantidad = ma.cantidad + pm.cantidad
+    FROM MaterialesAsignados AS ma
+    INNER JOIN PrestamoMateriales AS pm
+        ON ma.tipoProducto = pm.tipoProducto
+      AND ma.codProducto  = pm.codProducto
+      AND ma.dni          = pm.dniPrestador
+    WHERE ma.codEmpresa = '02'
+      AND pm.idPrestamo = @idPrestamo
+      
+    delete from PrestamoMateriales
+    WHERE idPrestamo = @idPrestamo
+    `;
+
+    
+    const params = {
+      idPrestamo: idPrestamo
     }
 
     const result = await executeQuery(configLogin, query, params);
@@ -362,6 +438,15 @@ export const devolverMaterial = async (req, res) => {
     const { idPrestamo } = req.body
 
     const query = `
+      UPDATE M
+      SET M.cantidad = M.cantidad - P.cantidad
+      FROM MaterialesAsignados M
+      INNER JOIN PrestamoMateriales P
+          ON M.dni = P.dniRecepcionador
+        AND M.codEmpresa = P.codEmpresa
+        AND M.codProducto = P.codProducto
+      WHERE P.idPrestamo = @idPrestamo;
+
       UPDATE PrestamoMateriales
       SET devolverPrestamo = 1
       WHERE idPrestamo = @idPrestamo
@@ -389,15 +474,6 @@ export const confirmarDevolucion = async (req, res) => {
     const { idPrestamo } = req.body
 
     const query = `
-      UPDATE M
-      SET M.cantidad = M.cantidad - P.cantidad
-      FROM MaterialesAsignados M
-      INNER JOIN PrestamoMateriales P
-          ON M.dni = P.dniRecepcionador
-        AND M.codEmpresa = P.codEmpresa
-        AND M.codProducto = P.codProducto
-      WHERE P.idPrestamo = @idPrestamo;
-
       UPDATE M
       SET M.cantidad = M.cantidad + P.cantidad
       FROM MaterialesAsignados M
@@ -429,22 +505,37 @@ export const confirmarDevolucion = async (req, res) => {
   }
 }
 
-/* export async function AsignarProducto(idDocument) {
+export const cancelarDevolucion = async (req, res) => {
   try {
+    const { idPrestamo } = req.body
+
     const query = `
-          INSERT INTO MaterialesAsignados @idDocument = @idDocument`;
+      UPDATE M
+      SET M.cantidad = M.cantidad + P.cantidad
+      FROM MaterialesAsignados M
+      INNER JOIN PrestamoMateriales P
+          ON M.dni = P.dniRecepcionador
+        AND M.codEmpresa = P.codEmpresa
+        AND M.codProducto = P.codProducto
+      WHERE P.idPrestamo = @idPrestamo;
 
-    const params = { idDocument };
-    const result = await executeQueryMultiple(configLogin, query, params);
+      UPDATE PrestamoMateriales
+      SET devolverPrestamo = 0,
+          devolucionConfirmada = 0;
+    `;
 
-    return {
-      factura: result.recordsets[0]?.[0] || null,
-      detalles: result.recordsets[1] || [],
-      doc_relacionados: result.recordsets[2] || [],
+    const params = {
+      idPrestamo: idPrestamo 
     };
 
+    const result = await executeQuery(configLogin, query, params);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    })
   } catch (error) {
-    console.error('❌ Error servicio: ', error);
-    throw new Error(error.message || 'Error del servidor');
+    console.error("❌ Error en el controlador:", error);
+    res.status(500).json({ success: false, message: "Error del servidor" });
   }
-} */
+}

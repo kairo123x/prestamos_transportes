@@ -146,3 +146,21 @@ export const confirmarDevolucion = async (idPrestamo) => {
         console.error('Error', error);
     }
 }
+
+export const cancelarPrestamo = async (idPrestamo) => {
+    try {
+        const response = await apiClient.post(rutaGeneral+'/cancelar-prestamo', { idPrestamo: idPrestamo });
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}
+
+export const cancelarDevolucion = async (idPrestamo) => {
+    try {
+        const response = await apiClient.post(rutaGeneral+'/cancelar-devolucion', { idPrestamo: idPrestamo });
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}

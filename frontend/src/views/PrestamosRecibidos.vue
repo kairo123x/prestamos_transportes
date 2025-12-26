@@ -45,39 +45,29 @@
             :row-class-name="tableRowClassName"
             class="custom-table"
           >
-            <el-table-column prop="dniPrestador" label="DNI Prestador" width="150">
+            <el-table-column prop="nombrePrestador" label="Prestador" width="150">
               <template #default="scope">
                 <div class="dni-cell">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  <span>{{ scope.row.dniPrestador }}</span>
+                  <span>{{ scope.row.nombrePrestador }}</span>
                 </div>
               </template>
             </el-table-column>
             
-            <el-table-column prop="dniRecepcionador" label="DNI Receptor" width="150">
+            <el-table-column prop="nombreRecepcionador" label="Receptor" width="150">
               <template #default="scope">
                 <div class="dni-cell receptor">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                  <span>{{ scope.row.dniRecepcionador }}</span>
+                  <span>{{ scope.row.nombreRecepcionador }}</span>
                 </div>
               </template>
             </el-table-column>
             
-            <el-table-column prop="codEmpresa" label="Empresa" width="100">
+            <!-- <el-table-column prop="codEmpresa" label="Empresa" width="100">
               <template #default="scope">
                 <span class="empresa-badge">{{ scope.row.codEmpresa }}</span>
               </template>
-            </el-table-column>
+            </el-table-column> -->
             
-            <el-table-column prop="tipoProducto" label="Tipo" width="130">
+            <el-table-column prop="tipoProducto" label="Tipo" width="140">
               <template #default="scope">
                 <span class="tipo-badge">{{ scope.row.tipoProducto }}</span>
               </template>
@@ -86,6 +76,18 @@
             <el-table-column prop="codProducto" label="Código" min-width="140">
               <template #default="scope">
                 <span class="producto-code">{{ scope.row.codProducto }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="descripcionProducto" label="Descripción" min-width="140">
+              <template #default="scope">
+                <span>{{ scope.row.descripcionProducto }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column prop="cantidad" label="Cantidad" width="120" align="center">
+              <template #default="scope">
+                <span>{{ scope.row.cantidad }}</span>
               </template>
             </el-table-column>
             
@@ -137,7 +139,24 @@
                   </svg>
                   Devolver
                 </button>
-                <span v-else class="status-completado">
+                <button
+                  v-else-if="scope.row.prestamoAprobado==true && scope.row.devolverPrestamo==true && scope.row.devolucionConfirmada==false"
+                  class="btn-devolver"
+                  @click="cancelarDevolucionMaterial(scope.row)"
+                >
+                  Cancelar Devolución
+                </button>
+                <span 
+                  v-else-if="scope.row.devolucionConfirmada==true" 
+                  class="status-completado"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  Completado
+                </span>
+                <span v-else class="status-en-proceso">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                     <polyline points="22 4 12 14.01 9 11.01"/>
@@ -156,7 +175,7 @@
 <script setup>
 import { onMounted, ref } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus";
-import {listarProductos, ListarPrestamosRecibidos, listarTrabajadores, aprobarMaterialRecibido, confirmarDevolucion, devolverMaterial} from "../services/prestamoService"
+import {listarProductos, ListarPrestamosRecibidos, listarTrabajadores, aprobarMaterialRecibido, confirmarDevolucion, devolverMaterial, cancelarDevolucion} from "../services/prestamoService"
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
 import { FormatFechaCorta, getStatusPrestamo, getStatusPrestamoStyle } from "../utils";
@@ -242,10 +261,6 @@ const loadTrabajadores = async() => {
   }
 };
 
-const aprobar = (loan) => {
-  alert(`Préstamo aprobado para ${loan.dniRecepcionador}`);
-};
-
 const aprobarRecepcionPrestamo = async (item) => {
   try {
     await ElMessageBox.confirm(
@@ -269,6 +284,32 @@ const aprobarRecepcionPrestamo = async (item) => {
   } catch (error) {
     console.log('Error al aprobar préstamo', error);
     ElMessage.error('Se produjo un error al aprobar la recepción del material. Intente nuevamente.');
+  }
+};
+
+const cancelarDevolucionMaterial = async (item) => {
+  try {
+    const responseConfirmacion = await ElMessageBox.confirm(
+      `¿Confirma que desea cancelar la devolución del material correspondiente al préstamo Nº ${item.idPrestamo}?`,
+      'Cancelar devolución de material',
+      {
+        confirmButtonText: 'Sí, cancelar',
+        cancelButtonText: 'Mantener',
+        type: 'warning'
+      }
+    );
+    console.log(item);
+    
+    if(responseConfirmacion){
+      const response = await cancelarDevolucion(item.idPrestamo);
+      if(response.data.success){
+        ElMessage.success('La devolución del material ha sido cancelada correctamente.');
+        loadListaPrestamos();
+      }
+    }
+  } catch (error) {
+    console.log('Error al cancelar devolución', error);
+    ElMessage.error('Se produjo un error al cancelar la devolución del material. Intente nuevamente.');
   }
 };
 </script>
@@ -561,11 +602,25 @@ const aprobarRecepcionPrestamo = async (item) => {
   color: #047857;
 }
 
-.status-completado {
+.status-en-proceso {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   color: #f59e0b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-en-proceso svg {
+  width: 16px;
+  height: 16px;
+}
+
+.status-completado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
   font-size: 13px;
   font-weight: 600;
 }
