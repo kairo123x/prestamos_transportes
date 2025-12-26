@@ -1,12 +1,19 @@
 <template>
-  <div class="crud-container">
-    <div class="page-layout">
-      <header class="page-header">
-        <div class="page-title-block">
-          <h2>Préstamos de Materiales Asignados</h2>
-          <p class="page-subtitle">
-            Registre y gestione los préstamos de materiales realizados a otros colaboradores.
-          </p>
+  <div class="view-wrapper">
+    <div class="view-container">
+      <!-- Header Section -->
+      <header class="view-header">
+        <div class="header-content">
+          <div class="header-icon loans-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+              <path d="m15 5 4 4"/>
+            </svg>
+          </div>
+          <div class="header-text">
+            <h1>Préstamos Realizados</h1>
+            <p>Registre y gestione los préstamos de materiales realizados a otros colaboradores</p>
+          </div>
         </div>
         <div class="header-actions">
           <button class="btn-primary" @click="openModal()">
@@ -46,44 +53,62 @@
             :row-class-name="tableRowClassName"
             class="custom-table"
           >
-            <el-table-column prop="dniPrestador" label="DNI prestador" />
-            <el-table-column prop="dniRecepcionador" label="DNI recepcionador" />
-            <el-table-column prop="codProducto" label="Código producto"/>
-            <el-table-column prop="tipoProducto" label="Tipo de producto"/>
-            <el-table-column prop="codEmpresa" label="Empresa" width="120" />
-            <el-table-column prop="prestamoEstado" label="Estado del Préstamo">
+            <el-table-column prop="dniPrestador" label="DNI Prestador" width="150">
               <template #default="scope">
-                <el-tag
-                  :type="getStatusPrestamoStyle(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada)"
-                  disable-transitions
-                  effect="dark"
-                >
-                  <b>
-                    {{ getStatusPrestamo(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada) }}
-                  </b>
-                </el-tag>
+                <div class="dni-cell">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  <span>{{ scope.row.dniPrestador }}</span>
+                </div>
               </template>
             </el-table-column>
-            <!-- <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
+            
+            <el-table-column prop="dniRecepcionador" label="DNI Receptor" width="150">
               <template #default="scope">
-                <span class="status-badge" :class="scope.row.prestamoAprobado ? 'approved' : 'pending'">
-                  <svg v-if="scope.row.prestamoAprobado" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"/>
+                <div class="dni-cell receptor">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                   </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
-                  </svg>
-                  {{ scope.row.prestamoAprobado ? 'Sí' : 'No' }}
+                  <span>{{ scope.row.dniRecepcionador }}</span>
+                </div>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="codProducto" label="Código" min-width="140">
+              <template #default="scope">
+                <span class="producto-code">{{ scope.row.codProducto }}</span>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="tipoProducto" label="Tipo" width="130">
+              <template #default="scope">
+                <span class="tipo-badge">{{ scope.row.tipoProducto }}</span>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="codEmpresa" label="Empresa" width="100">
+              <template #default="scope">
+                <span class="empresa-badge">{{ scope.row.codEmpresa }}</span>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="prestamoEstado" label="Estado" width="160" align="center">
+              <template #default="scope">
+                <span 
+                  class="status-badge-prestamo" 
+                  :class="getStatusPrestamoClass(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada)"
+                >
+                  {{ getStatusPrestamo(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada) }}
                 </span>
               </template>
-            </el-table-column> 
-            <el-table-column prop="devolverPrestamo" label="Devuelto" width="120" >
-              <template #default="scope">
-                {{ scope.row.devolverPrestamo ? 'Sí' : 'No' }}
-              </template>
-            </el-table-column>  -->
-            <el-table-column prop="fechaPrestamo" label="Fecha de préstamo" width="160" >
+            </el-table-column>
+            
+            <el-table-column prop="fechaPrestamo" label="Fecha" width="150">
               <template #default="scope">
                 <div class="fecha-cell">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -99,22 +124,37 @@
 
             <el-table-column label="Acciones" width="180" :fixed="isMobile ? false : 'right'" align="center">
               <template #default="scope">
-                <el-button
-                  type="primary"
-                  size="small"
+                <button
+                  class="btn-confirmar"
                   @click="confirmarDevolucionMaterial(scope.row)"
                   v-if="scope.row.devolverPrestamo==true && scope.row.devolucionConfirmada==false"
                 >
-                  Confirmar Devolución
-                </el-button>
-                <el-button
-                  type="danger"
-                  size="small"
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Confirmar
+                </button>
+                <button
+                  class="btn-eliminar"
                   @click="eliminar(scope.row)"
-                  v-if="scope.row.devolverPrestamo==false"
+                  v-if="scope.row.prestamoAprobado==false && scope.row.devolverPrestamo==false"
                 >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                  </svg>
                   Eliminar
-                </el-button>
+                </button>
+                <span 
+                  v-if="scope.row.devolucionConfirmada==true" 
+                  class="status-completado"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  Completado
+                </span>
               </template>
             </el-table-column>
           </el-table>
@@ -268,6 +308,13 @@ const dialogWidth = ref(window.innerWidth < 768 ? '90%' : '500px');
 
 const tableRowClassName = ({ rowIndex }) => {
   return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
+};
+
+const getStatusPrestamoClass = (aprobado, devolver, confirmado) => {
+  if (confirmado) return 'status-completado-badge';
+  if (devolver) return 'status-devolucion-badge';
+  if (aprobado) return 'status-aprobado-badge';
+  return 'status-pendiente-badge';
 };
 
 onMounted(()=> {
@@ -650,6 +697,105 @@ const maxCantidadDisponible = computed(() => {
   border-radius: 8px;
   font-weight: 600;
   font-size: 13px;
+}
+
+/* ===== Status Badge Préstamo ===== */
+.status-badge-prestamo {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-pendiente-badge {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+}
+
+.status-aprobado-badge {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+}
+
+.status-devolucion-badge {
+  background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+  color: #9d174d;
+}
+
+.status-completado-badge {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #047857;
+}
+
+/* ===== Action Buttons ===== */
+.btn-confirmar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-confirmar svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-confirmar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-eliminar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-eliminar svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-eliminar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.status-completado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-completado svg {
+  width: 16px;
+  height: 16px;
 }
 
 .status-badge {

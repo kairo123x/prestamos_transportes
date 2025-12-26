@@ -14,9 +14,9 @@
         >
           ☰
         </button>
-        <div class="navbar-brand">
+        <router-link to="/dashboard" class="navbar-brand">
           <h2>Gestión de Préstamos - Transporte</h2>
-        </div>
+        </router-link>
       </div>
       <div class="navbar-right">
         <div class="user-info">
@@ -193,6 +193,17 @@ body {
   align-items: center;
   gap: 15px;
   flex: 0 1 auto;
+}
+
+.navbar-brand {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
 }
 
 .navbar-brand h2 {
