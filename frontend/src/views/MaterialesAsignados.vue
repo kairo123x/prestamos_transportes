@@ -150,6 +150,19 @@
               </template>
             </el-table-column>
           </el-table>
+          <!-- Paginación -->
+          <div class="pagination-container" v-if="totalPages > 1">
+            <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="[5, 10, 20, 50]"
+              :total="totalItems"
+              layout="total, sizes, prev, pager, next, jumper"
+              @current-change="loadListaAsignados"
+              @size-change="() => loadListaAsignados(1)"
+              class="pagination"
+            />
+          </div>
         </div>
       </section>
 
@@ -404,6 +417,12 @@ const cantidadConsumida = ref(0);
 
 const dialogWidth = ref('600px');
 
+// Paginación
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalItems = ref(0);
+const totalPages = ref(0);
+
 onMounted(async()=> {
   window.addEventListener('resize', handleResize);
   dniUsuario.value = auth.currentUser.Dni
@@ -441,20 +460,27 @@ const admins = [
   '76370982'
 ];
 
-const loadListaAsignados = async () => {
+const loadListaAsignados = async (page = 1) => {
   try {
-    let response = null;    
+    let response = null;
+    currentPage.value = page;
+    
     if(admins.some(item=> item == dniUsuario.value)){
       console.log('es admin');
       
       response = await listarMaterialesAsignadosTotal();
+      if(response.data.success){
+        materialesAsignados.value = response.data.data;
+      }
     }else{
       console.log('no es admin');
 
-      response = await listarMaterialesAsignados(dniUsuario.value);
-    }
-    if(response.data.success){
-      materialesAsignados.value = response.data.data;
+      response = await listarMaterialesAsignados(dniUsuario.value, page, pageSize.value);
+      if(response.data.success){
+        materialesAsignados.value = response.data.data;
+        totalItems.value = response.data.pagination?.total || 0;
+        totalPages.value = response.data.pagination?.totalPages || 0;
+      }
     }
   } catch (error) {
     console.log('Error en prestamos', error);
@@ -1256,5 +1282,35 @@ const confirmarConsumoMaterial = async(item) => {
   .table-card-body {
     padding: 0;
   }
+}
+
+/* ===== Paginación ===== */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.pagination {
+  color: var(--color-gray-700);
+}
+
+:deep(.pagination .el-pagination__item.active) {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+:deep(.pagination .el-pagination__item:hover) {
+  color: var(--color-primary);
+}
+
+:deep(.pagination .btn-prev:hover,
+.pagination .btn-next:hover) {
+  color: var(--color-primary);
+}
+
+:deep(.pagination .el-pagination__sizes) {
+  margin: 0 10px;
 }
 </style>

@@ -172,6 +172,19 @@
               </template>
             </el-table-column>
           </el-table>
+          <!-- Paginación -->
+          <div class="pagination-container" v-if="totalPages > 1">
+            <el-pagination
+              v-model:current-page="currentPage"
+              v-model:page-size="pageSize"
+              :page-sizes="[5, 10, 20, 50]"
+              :total="totalItems"
+              layout="total, sizes, prev, pager, next, jumper"
+              @current-change="loadListaPrestamos"
+              @size-change="() => loadListaPrestamos(1)"
+              class="pagination"
+            />
+          </div>
         </div>
       </section>
 
@@ -321,6 +334,12 @@ const dniUser = ref(null);
 const isMobile = ref(window.innerWidth < 768);
 const dialogWidth = ref(window.innerWidth < 768 ? '95%' : '600px');
 
+// Paginación
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalItems = ref(0);
+const totalPages = ref(0);
+
 const tableRowClassName = ({ rowIndex }) => {
   return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
 };
@@ -371,11 +390,14 @@ function openModal(loan = null) {
 
 const prestamos = ref([]);
 
-const loadListaPrestamos = async () => {
+const loadListaPrestamos = async (page = 1) => {
   try {
-    const response = await ListarPrestamosRealizados(dniUser.value);
+    currentPage.value = page;
+    const response = await ListarPrestamosRealizados(dniUser.value, page, pageSize.value);
     if(response.data.success){
       prestamos.value = response.data.data;
+      totalItems.value = response.data.pagination?.total || 0;
+      totalPages.value = response.data.pagination?.totalPages || 0;
       console.log(prestamos.value);
     }
   } catch (error) {
@@ -1218,5 +1240,35 @@ const maxCantidadDisponible = computed(() => {
   .table-card-body {
     padding: 0;
   }
+}
+
+/* ===== Paginación ===== */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.pagination {
+  color: var(--color-gray-700);
+}
+
+:deep(.pagination .el-pagination__item.active) {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+:deep(.pagination .el-pagination__item:hover) {
+  color: var(--color-primary);
+}
+
+:deep(.pagination .btn-prev:hover,
+.pagination .btn-next:hover) {
+  color: var(--color-primary);
+}
+
+:deep(.pagination .el-pagination__sizes) {
+  margin: 0 10px;
 }
 </style>

@@ -15,11 +15,13 @@ export const listarProductos = async (search) => {
     }
 }
 
-export const listarMaterialesAsignados = async (dni) => {
+export const listarMaterialesAsignados = async (dni, page = 1, pageSize = 10) => {
     try {
         const response = await apiClient.get(rutaGeneral+'/materiales-asignados', {
             params:{
-                dni: dni 
+                dni: dni,
+                page: page,
+                pageSize: pageSize
             }
         });
         return response;
@@ -72,11 +74,13 @@ export const ConsumirMaterialAsignado = async (data) => {
     }
 }
 
-export const ListarPrestamosRealizados = async (dniPrestador) => {
+export const ListarPrestamosRealizados = async (dniPrestador, page = 1, pageSize = 10) => {
     try {
         const response = await apiClient.get(rutaGeneral+'/listar-prestamos-realizados', {
             params: {
-                dniPrestador: dniPrestador
+                dniPrestador: dniPrestador,
+                page: page,
+                pageSize: pageSize
             }
         });
         return response;
@@ -85,11 +89,13 @@ export const ListarPrestamosRealizados = async (dniPrestador) => {
     }
 }
 
-export const ListarPrestamosRecibidos = async (dniRecepcionador) => {
+export const ListarPrestamosRecibidos = async (dniRecepcionador, page = 1, pageSize = 10) => {
     try {
         const response = await apiClient.get(rutaGeneral+'/listar-prestamos-recibidos', {
             params: {
-                dniRecepcionador: dniRecepcionador
+                dniRecepcionador: dniRecepcionador,
+                page: page,
+                pageSize: pageSize
             }
         });
         return response;

@@ -23,19 +23,53 @@ export const listarProductos = async (req, res) => {
 
 export const listarMaterialesAsignados = async (req, res) => {
   try {
-    const { dni } = req.query
+    const { dni, page = 1, pageSize = 10 } = req.query
+    const pageNum = parseInt(page) || 1;
+    const pageSizeNum = parseInt(pageSize) || 10;
+    const offset = (pageNum - 1) * pageSizeNum;
 
-    const query = `EXEC RECOVER_MATERIALES_ASIGNADOS @dni`;
+    // Obtener total de registros
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM MaterialesAsignados
+      WHERE dni = @dni
+    `;
 
     const params = { 
-      dni:dni 
+      dni: dni 
     };
 
-    const result = await executeQuery(configLogin, query, params);
+    const countResult = await executeQuery(configLogin, countQuery, params);
+    const total = countResult[0]?.total || 0;
+
+    // Obtener registros paginados
+    const paginatedQuery = `
+      SELECT * FROM (
+        SELECT ROW_NUMBER() OVER (ORDER BY idMaterialAsignado DESC) as rn, *
+        FROM MaterialesAsignados
+        WHERE dni = @dni
+      ) AS paged
+      WHERE rn BETWEEN @offset + 1 AND @offset + @pageSize
+      ORDER BY rn
+    `;
+
+    const paginatedParams = { 
+      dni: dni,
+      offset: offset,
+      pageSize: pageSizeNum
+    };
+
+    const paginatedResult = await executeQuery(configLogin, paginatedQuery, paginatedParams);
 
     res.status(200).json({
       success: true,
-      data: result
+      data: paginatedResult,
+      pagination: {
+        page: pageNum,
+        pageSize: pageSizeNum,
+        total: total,
+        totalPages: Math.ceil(total / pageSizeNum)
+      }
     })
   } catch (error) {
     console.error("❌ Error en el controlador:", error);
@@ -137,14 +171,14 @@ export const listarTrabajadores = async (req, res) => {
 
 export const listarPrestamosRealizados = async (req, res) => {
   try {
-    const { dniPrestador } = req.query;
+    const { dniPrestador, page = 1, pageSize = 10 } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const pageSizeNum = parseInt(pageSize) || 10;
+    const offset = (pageNum - 1) * pageSizeNum;
 
-    const query = `
-    SELECT 
-          p.*,
-          m.descripcionProducto,
-          CONCAT(t1.TRAB_APELLPAT, ' ', t1.TRAB_APELLMAT, ' ', t1.TRAB_NOMBRES) AS nombrePrestador,
-          CONCAT(t2.TRAB_APELLPAT, ' ', t2.TRAB_APELLMAT, ' ', t2.TRAB_NOMBRES) AS nombreRecepcionador
+    // Obtener total de registros
+    const countQuery = `
+      SELECT COUNT(*) as total
       FROM PrestamoMateriales p
       INNER JOIN MaterialesAsignados m 
           ON p.tipoProducto = m.tipoProducto 
@@ -158,15 +192,54 @@ export const listarPrestamosRealizados = async (req, res) => {
         AND t2.TRAB_ESTADO = 1
       WHERE p.dniPrestador = @dniPrestador`;
 
-    const params = {
+    const countParams = {
       dniPrestador: dniPrestador
+    };
+
+    const countResult = await executeQuery(configLogin, countQuery, countParams);
+    const total = countResult[0]?.total || 0;
+
+    const query = `
+      SELECT 
+          paged.*,
+          m.descripcionProducto,
+          CONCAT(t1.TRAB_APELLPAT, ' ', t1.TRAB_APELLMAT, ' ', t1.TRAB_NOMBRES) AS nombrePrestador,
+          CONCAT(t2.TRAB_APELLPAT, ' ', t2.TRAB_APELLMAT, ' ', t2.TRAB_NOMBRES) AS nombreRecepcionador
+      FROM (
+        SELECT ROW_NUMBER() OVER (ORDER BY idPrestamo DESC) as rn, *
+        FROM PrestamoMateriales
+        WHERE dniPrestador = @dniPrestador
+      ) as paged
+      INNER JOIN MaterialesAsignados m 
+          ON paged.tipoProducto = m.tipoProducto 
+        AND paged.codProducto = m.codProducto 
+        AND paged.dniPrestador = m.dni
+      INNER JOIN RRHH_TRABAJADORES t1 
+          ON t1.TRAB_DNI = paged.dniPrestador 
+        AND t1.TRAB_ESTADO = 1
+      INNER JOIN RRHH_TRABAJADORES t2 
+          ON t2.TRAB_DNI = paged.dniRecepcionador 
+        AND t2.TRAB_ESTADO = 1
+      WHERE paged.rn BETWEEN @offset + 1 AND @offset + @pageSize
+      ORDER BY paged.rn`;
+
+    const params = {
+      dniPrestador: dniPrestador,
+      offset: offset,
+      pageSize: pageSizeNum
     }
 
     const result = await executeQuery(configLogin, query, params);
 
     res.status(200).json({
       success: true,
-      data: result
+      data: result,
+      pagination: {
+        page: pageNum,
+        pageSize: pageSizeNum,
+        total: total,
+        totalPages: Math.ceil(total / pageSizeNum)
+      }
     })
   } catch (error) {
     console.error("❌ Error en el controlador:", error);
@@ -176,14 +249,14 @@ export const listarPrestamosRealizados = async (req, res) => {
 
 export const listarPrestamosRecibidos = async (req, res) => {
   try {
-    const { dniRecepcionador } = req.query;
+    const { dniRecepcionador, page = 1, pageSize = 10 } = req.query;
+    const pageNum = parseInt(page) || 1;
+    const pageSizeNum = parseInt(pageSize) || 10;
+    const offset = (pageNum - 1) * pageSizeNum;
 
-    const query = `
-      SELECT 
-          p.*,
-          m.descripcionProducto,
-          CONCAT(t1.TRAB_APELLPAT, ' ', t1.TRAB_APELLMAT, ' ', t1.TRAB_NOMBRES) AS nombrePrestador,
-          CONCAT(t2.TRAB_APELLPAT, ' ', t2.TRAB_APELLMAT, ' ', t2.TRAB_NOMBRES) AS nombreRecepcionador
+    // Obtener total de registros
+    const countQuery = `
+      SELECT COUNT(*) as total
       FROM PrestamoMateriales p
       INNER JOIN MaterialesAsignados m 
           ON p.tipoProducto = m.tipoProducto 
@@ -195,17 +268,56 @@ export const listarPrestamosRecibidos = async (req, res) => {
       INNER JOIN RRHH_TRABAJADORES t2 
           ON t2.TRAB_DNI = p.dniRecepcionador 
         AND t2.TRAB_ESTADO = 1
-      WHERE dniRecepcionador=@dniRecepcionador`;
+      WHERE p.dniRecepcionador = @dniRecepcionador`;
+
+    const countParams = {
+      dniRecepcionador: dniRecepcionador
+    };
+
+    const countResult = await executeQuery(configLogin, countQuery, countParams);
+    const total = countResult[0]?.total || 0;
+
+    const query = `
+      SELECT 
+          paged.*,
+          m.descripcionProducto,
+          CONCAT(t1.TRAB_APELLPAT, ' ', t1.TRAB_APELLMAT, ' ', t1.TRAB_NOMBRES) AS nombrePrestador,
+          CONCAT(t2.TRAB_APELLPAT, ' ', t2.TRAB_APELLMAT, ' ', t2.TRAB_NOMBRES) AS nombreRecepcionador
+      FROM (
+        SELECT ROW_NUMBER() OVER (ORDER BY p.idPrestamo DESC) as rn, p.*
+        FROM PrestamoMateriales p
+        WHERE p.dniRecepcionador = @dniRecepcionador
+      ) as paged
+      INNER JOIN MaterialesAsignados m 
+          ON paged.tipoProducto = m.tipoProducto 
+        AND paged.codProducto = m.codProducto 
+        AND paged.dniPrestador = m.dni
+      INNER JOIN RRHH_TRABAJADORES t1 
+          ON t1.TRAB_DNI = paged.dniPrestador 
+        AND t1.TRAB_ESTADO = 1
+      INNER JOIN RRHH_TRABAJADORES t2 
+          ON t2.TRAB_DNI = paged.dniRecepcionador 
+        AND t2.TRAB_ESTADO = 1
+      WHERE paged.rn BETWEEN @offset + 1 AND @offset + @pageSize
+      ORDER BY paged.rn`;
 
     const params = {
-      dniRecepcionador: dniRecepcionador
+      dniRecepcionador: dniRecepcionador,
+      offset: offset,
+      pageSize: pageSizeNum
     }
 
     const result = await executeQuery(configLogin, query, params);
 
     res.status(200).json({
       success: true,
-      data: result
+      data: result,
+      pagination: {
+        page: pageNum,
+        pageSize: pageSizeNum,
+        total: total,
+        totalPages: Math.ceil(total / pageSizeNum)
+      }
     })
   } catch (error) {
     console.error("❌ Error en el controlador:", error);
