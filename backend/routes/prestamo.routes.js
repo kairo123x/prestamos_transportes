@@ -12,7 +12,9 @@ import {
     listarPrestamosRecibidos,
     prestarMaterial,
     aprobarMaterialRecibido,
-    listarMaterialesTrabajadorCombinado
+    listarMaterialesTrabajadorCombinado,
+    devolverMaterial,
+    confirmarDevolucion
 } from '../controllers/prestamos.controller.js';
 
 const router = express.Router();
@@ -28,6 +30,8 @@ router.get('/listar-prestamos-recibidos', listarPrestamosRecibidos)
 router.post('/prestar-material', prestarMaterial)
 router.post('/aprobar-material-recibido', aprobarMaterialRecibido)
 router.get('/materiales-trabajador-combinado', listarMaterialesTrabajadorCombinado)
+router.post('/devolver-material', devolverMaterial)
+router.post('/confirmar-devolucion', confirmarDevolucion)
 
 export default router;
 

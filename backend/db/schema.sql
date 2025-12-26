@@ -17,7 +17,8 @@ CREATE TABLE PrestamoMateriales (
 	tipoProducto VARCHAR(6),
 	codProducto VARCHAR(30),
 	prestamoAprobado BIT,
-	prestamoDevuelto BIT,
+	devolverPrestamo BIT,
+	devolucionConfirmada BIT,
 	cantidad INT,
 	fechaPrestamo DATE
 )

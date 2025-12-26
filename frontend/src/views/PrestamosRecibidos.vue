@@ -34,16 +34,29 @@
             <el-table-column prop="codEmpresa" label="Empresa" width="120" />
             <el-table-column prop="tipoProducto" label="Tipo de producto" width="150" />
             <el-table-column prop="codEmpresa" label="Código de producto" width="150" />
-            <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
+            <el-table-column prop="prestamoEstado" label="Estado del Préstamo">
+              <template #default="scope">
+                <el-tag
+                  :type="getStatusPrestamoStyle(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.confirmaDevolucion)"
+                  disable-transitions
+                  effect="dark"
+                >
+                  <b>
+                    {{ getStatusPrestamo(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.confirmaDevolucion) }}
+                  </b>
+                </el-tag>
+              </template>
+            </el-table-column>
+            <!-- <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
               <template #default="scope">
                 {{ scope.row.prestamoAprobado ? 'Sí' : 'No' }}
               </template>
             </el-table-column>
-            <el-table-column prop="prestamoDevuelto" label="Devuelto" width="120" >
+            <el-table-column prop="devolverPrestamo" label="Devuelto" width="120" >
               <template #default="scope">
-                {{ scope.row.prestamoDevuelto ? 'Sí' : 'No' }}
+                {{ scope.row.devolverPrestamo ? 'Sí' : 'No' }}
               </template>
-            </el-table-column>
+            </el-table-column> -->
             <el-table-column prop="fechaPrestamo" label="Fecha de préstamo" width="160">
               <template #default="scope">
                 {{ FormatFechaCorta(scope.row.fechaPrestamo) }}
@@ -60,6 +73,14 @@
                 >
                   Aprobar recepción
                 </el-button>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="devolverPrestamo(scope.row)"
+                  v-else-if="scope.row.prestamoAprobado==true && scope.row.devolverPrestamo==false"
+                >
+                  Devolver
+                </el-button>
                 <span v-else>---</span>
               </template>
             </el-table-column>
@@ -73,10 +94,10 @@
 <script setup>
 import { onMounted, ref } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus";
-import {listarProductos, ListarPrestamosRecibidos, listarTrabajadores, aprobarMaterialRecibido} from "../services/prestamoService"
+import {listarProductos, ListarPrestamosRecibidos, listarTrabajadores, aprobarMaterialRecibido, confirmarDevolucion, devolverMaterial} from "../services/prestamoService"
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
-import { FormatFechaCorta } from "../utils";
+import { FormatFechaCorta, getStatusPrestamo, getStatusPrestamoStyle } from "../utils";
 
 const router = useRouter()
 
@@ -93,6 +114,18 @@ onMounted(()=> {
   loadTrabajadores();
   loadListaPrestamos();
 })
+
+const devolverPrestamo = async (item) => {
+  try {
+    const response = await devolverMaterial(item.idPrestamo);
+    if(response.data.success){
+      ElMessage.success('La devolución del material fue registrada correctamente.');
+      loadListaPrestamos();
+    }
+  } catch (error) {
+    console.log('Error al devolver préstamo', error);
+  }
+}
 
 const showModal = ref(false)
 const editingLoan = ref(null)

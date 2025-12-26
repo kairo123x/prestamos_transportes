@@ -130,3 +130,21 @@ export const listarMaterialesTrabajadorCombinado = async (dni) => {
         console.error('Error', error);
     }
 }
+
+export const devolverMaterial = async (idPrestamo) => {
+    try {
+        const response = await apiClient.post(rutaGeneral+'/devolver-material', { idPrestamo: idPrestamo});
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}
+
+export const confirmarDevolucion = async (idPrestamo) => {
+    try {
+        const response = await apiClient.post(rutaGeneral+'/confirmar-devolucion', { idPrestamo: idPrestamo });
+        return response;
+    } catch (error) {
+        console.error('Error', error);
+    }
+}

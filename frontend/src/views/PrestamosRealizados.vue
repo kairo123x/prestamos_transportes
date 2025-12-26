@@ -3,7 +3,7 @@
     <div class="page-layout">
       <header class="page-header">
         <div class="page-title-block">
-          <h2>Préstamos de materiales asignados</h2>
+          <h2>Préstamos de Materiales Asignados</h2>
           <p class="page-subtitle">
             Registre y gestione los préstamos de materiales realizados a otros colaboradores.
           </p>
@@ -32,21 +32,34 @@
             }"
             :cell-style="{ color: '#1f2933', fontSize: '13px' }"
           >
-            <el-table-column prop="dniPrestador" label="DNI prestador" width="150" />
-            <el-table-column prop="dniRecepcionador" label="DNI recepcionador" width="150" />
-            <el-table-column prop="codProducto" label="Código producto" width="150" />
-            <el-table-column prop="tipoProducto" label="Tipo de producto" width="150" />
+            <el-table-column prop="dniPrestador" label="DNI prestador" />
+            <el-table-column prop="dniRecepcionador" label="DNI recepcionador" />
+            <el-table-column prop="codProducto" label="Código producto"/>
+            <el-table-column prop="tipoProducto" label="Tipo de producto"/>
             <el-table-column prop="codEmpresa" label="Empresa" width="120" />
-            <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
+            <el-table-column prop="prestamoEstado" label="Estado del Préstamo">
+              <template #default="scope">
+                <el-tag
+                  :type="getStatusPrestamoStyle(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada)"
+                  disable-transitions
+                  effect="dark"
+                >
+                  <b>
+                    {{ getStatusPrestamo(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada) }}
+                  </b>
+                </el-tag>
+              </template>
+            </el-table-column>
+            <!-- <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
               <template #default="scope">
                 {{ scope.row.prestamoAprobado ? 'Sí' : 'No' }}
               </template>
             </el-table-column> 
-            <el-table-column prop="prestamoDevuelto" label="Devuelto" width="120" >
+            <el-table-column prop="devolverPrestamo" label="Devuelto" width="120" >
               <template #default="scope">
-                {{ scope.row.prestamoDevuelto ? 'Sí' : 'No' }}
+                {{ scope.row.devolverPrestamo ? 'Sí' : 'No' }}
               </template>
-            </el-table-column> 
+            </el-table-column>  -->
             <el-table-column prop="fechaPrestamo" label="Fecha de préstamo" width="160" >
               <template #default="scope">
                 {{ FormatFechaCorta(scope.row.fechaPrestamo) }}
@@ -58,16 +71,16 @@
                 <el-button
                   type="primary"
                   size="small"
-                  @click="editar(scope.row)"
-                  v-if="scope.row.prestamoDevuelto==false"
+                  @click="confirmarDevolucionMaterial(scope.row)"
+                  v-if="scope.row.devolverPrestamo==true && scope.row.devolucionConfirmada==false"
                 >
-                  Editar
+                  Confirmar Devolución
                 </el-button>
                 <el-button
                   type="danger"
                   size="small"
                   @click="eliminar(scope.row)"
-                  v-if="scope.row.prestamoDevuelto==false"
+                  v-if="scope.row.devolverPrestamo==false"
                 >
                   Eliminar
                 </el-button>
@@ -134,12 +147,13 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus";
+import { getStatusPrestamo, getStatusPrestamoStyle } from "../utils";
 import { 
   ListarPrestamosRealizados, 
   listarTrabajadores, 
   PrestarMaterial, 
   listarMaterialesAsignados,
-  aprobarMaterialRecibido
+  confirmarDevolucion
 } from "../services/prestamoService"
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
@@ -167,7 +181,7 @@ const formPrestamoMaterial = ref({
   tipoProducto: '', 
   codProducto: '', 
   prestamoAprobado: false, 
-  prestamoDevuelto: false,
+  devolverPrestamo: false,
   cantidad: 0, 
   fechaPrestamo: ''
 });
@@ -305,6 +319,33 @@ const guardarPrestamoMaterial = async() => {
     ElMessage.error('Ocurrió un error al registrar el préstamo de material. Inténtelo nuevamente.');
   }
 }
+
+const confirmarDevolucionMaterial = async(item) => {
+  try {
+    const response = await ElMessageBox.confirm(
+      `¿Confirma que desea registrar la devolución del material prestado correspondiente al préstamo Nº ${item.idPrestamo}?`,
+      'Confirmar devolución de material',
+      {
+        confirmButtonText: 'Sí, registrar',
+        cancelButtonText: 'Cancelar',
+        type: 'warning'
+      }
+    );
+
+    if(response){
+
+      const resp = await confirmarDevolucion(item.idPrestamo);
+      console.log(resp);
+      
+      if(resp.data.success){
+        ElMessage.success('La devolución del material fue registrada correctamente.');
+        loadListaPrestamos();
+      }
+    }
+  } catch (error) {
+    console.log('Error al confirmar devolución', error);
+  }
+};
 
 const maxCantidadDisponible = computed(() => {
   if (!formPrestamoMaterial.value.codProducto) return 1;

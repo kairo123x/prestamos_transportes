@@ -33,3 +33,5 @@ build/
 # Temporal
 tmp/
 temp/
+
+backend/node_modules/
