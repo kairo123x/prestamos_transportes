@@ -1,19 +1,12 @@
 <template>
-  <div class="view-wrapper">
-    <div class="view-container">
-      <!-- Header Section -->
-      <header class="view-header">
-        <div class="header-content">
-          <div class="header-icon loans-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-              <path d="m15 5 4 4"/>
-            </svg>
-          </div>
-          <div class="header-text">
-            <h1>Préstamos Realizados</h1>
-            <p>Registre y gestione los préstamos de materiales realizados a otros colaboradores</p>
-          </div>
+  <div class="crud-container">
+    <div class="page-layout">
+      <header class="page-header">
+        <div class="page-title-block">
+          <h2>Préstamos de Materiales Asignados</h2>
+          <p class="page-subtitle">
+            Registre y gestione los préstamos de materiales realizados a otros colaboradores.
+          </p>
         </div>
         <div class="header-actions">
           <button class="btn-primary" @click="openModal()">
@@ -53,51 +46,25 @@
             :row-class-name="tableRowClassName"
             class="custom-table"
           >
-            <el-table-column prop="dniPrestador" label="DNI Prestador" width="150">
+            <el-table-column prop="dniPrestador" label="DNI prestador" />
+            <el-table-column prop="dniRecepcionador" label="DNI recepcionador" />
+            <el-table-column prop="codProducto" label="Código producto"/>
+            <el-table-column prop="tipoProducto" label="Tipo de producto"/>
+            <el-table-column prop="codEmpresa" label="Empresa" width="120" />
+            <el-table-column prop="prestamoEstado" label="Estado del Préstamo">
               <template #default="scope">
-                <div class="dni-cell">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                  </svg>
-                  <span>{{ scope.row.dniPrestador }}</span>
-                </div>
+                <el-tag
+                  :type="getStatusPrestamoStyle(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada)"
+                  disable-transitions
+                  effect="dark"
+                >
+                  <b>
+                    {{ getStatusPrestamo(scope.row.prestamoAprobado, scope.row.devolverPrestamo, scope.row.devolucionConfirmada) }}
+                  </b>
+                </el-tag>
               </template>
             </el-table-column>
-            
-            <el-table-column prop="dniRecepcionador" label="DNI Receptor" width="150">
-              <template #default="scope">
-                <div class="dni-cell receptor">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                    <circle cx="9" cy="7" r="4"/>
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                  <span>{{ scope.row.dniRecepcionador }}</span>
-                </div>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="codProducto" label="Código" min-width="140">
-              <template #default="scope">
-                <span class="producto-code">{{ scope.row.codProducto }}</span>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="tipoProducto" label="Tipo" width="140">
-              <template #default="scope">
-                <span class="tipo-badge">{{ scope.row.tipoProducto }}</span>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="codEmpresa" label="Empresa" width="110">
-              <template #default="scope">
-                <span class="empresa-badge">{{ scope.row.codEmpresa }}</span>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" align="center">
+            <!-- <el-table-column prop="prestamoAprobado" label="Aprobado" width="120" >
               <template #default="scope">
                 <span class="status-badge" :class="scope.row.prestamoAprobado ? 'approved' : 'pending'">
                   <svg v-if="scope.row.prestamoAprobado" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -110,23 +77,13 @@
                   {{ scope.row.prestamoAprobado ? 'Sí' : 'No' }}
                 </span>
               </template>
-            </el-table-column>
-            
-            <el-table-column prop="prestamoDevuelto" label="Devuelto" width="120" align="center">
+            </el-table-column> 
+            <el-table-column prop="devolverPrestamo" label="Devuelto" width="120" >
               <template #default="scope">
-                <span class="status-badge" :class="scope.row.prestamoDevuelto ? 'returned' : 'not-returned'">
-                  <svg v-if="scope.row.prestamoDevuelto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                  </svg>
-                  {{ scope.row.prestamoDevuelto ? 'Sí' : 'No' }}
-                </span>
+                {{ scope.row.devolverPrestamo ? 'Sí' : 'No' }}
               </template>
-            </el-table-column>
-            
-            <el-table-column prop="fechaPrestamo" label="Fecha Préstamo" width="170">
+            </el-table-column>  -->
+            <el-table-column prop="fechaPrestamo" label="Fecha de préstamo" width="160" >
               <template #default="scope">
                 <div class="fecha-cell">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -142,20 +99,22 @@
 
             <el-table-column label="Acciones" width="180" :fixed="isMobile ? false : 'right'" align="center">
               <template #default="scope">
-                <div class="action-buttons" v-if="!scope.row.prestamoDevuelto">
-                  <button class="btn-edit" @click="editar(scope.row)">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-                    </svg>
-                  </button>
-                  <button class="btn-delete" @click="eliminar(scope.row)">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                    </svg>
-                  </button>
-                </div>
-                <span v-else class="no-actions">---</span>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="confirmarDevolucionMaterial(scope.row)"
+                  v-if="scope.row.devolverPrestamo==true && scope.row.devolucionConfirmada==false"
+                >
+                  Confirmar Devolución
+                </el-button>
+                <el-button
+                  type="danger"
+                  size="small"
+                  @click="eliminar(scope.row)"
+                  v-if="scope.row.devolverPrestamo==false"
+                >
+                  Eliminar
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -288,12 +247,13 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus";
+import { getStatusPrestamo, getStatusPrestamoStyle } from "../utils";
 import { 
   ListarPrestamosRealizados, 
   listarTrabajadores, 
   PrestarMaterial, 
   listarMaterialesAsignados,
-  aprobarMaterialRecibido
+  confirmarDevolucion
 } from "../services/prestamoService"
 import { useAuthStore } from "../stores/auth";
 import { useRouter } from "vue-router";
@@ -327,7 +287,7 @@ const formPrestamoMaterial = ref({
   tipoProducto: '', 
   codProducto: '', 
   prestamoAprobado: false, 
-  prestamoDevuelto: false,
+  devolverPrestamo: false,
   cantidad: 0, 
   fechaPrestamo: ''
 });
@@ -465,6 +425,33 @@ const guardarPrestamoMaterial = async() => {
     ElMessage.error('Ocurrió un error al registrar el préstamo de material. Inténtelo nuevamente.');
   }
 }
+
+const confirmarDevolucionMaterial = async(item) => {
+  try {
+    const response = await ElMessageBox.confirm(
+      `¿Confirma que desea registrar la devolución del material prestado correspondiente al préstamo Nº ${item.idPrestamo}?`,
+      'Confirmar devolución de material',
+      {
+        confirmButtonText: 'Sí, registrar',
+        cancelButtonText: 'Cancelar',
+        type: 'warning'
+      }
+    );
+
+    if(response){
+
+      const resp = await confirmarDevolucion(item.idPrestamo);
+      console.log(resp);
+      
+      if(resp.data.success){
+        ElMessage.success('La devolución del material fue registrada correctamente.');
+        loadListaPrestamos();
+      }
+    }
+  } catch (error) {
+    console.log('Error al confirmar devolución', error);
+  }
+};
 
 const maxCantidadDisponible = computed(() => {
   if (!formPrestamoMaterial.value.codProducto) return 1;
