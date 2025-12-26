@@ -17,7 +17,7 @@
           </div>
         </div>
         <div class="header-actions">
-          <button class="btn-primary" @click="openModal()">
+          <button class="btn-primary" @click="openModal()" v-if="havePermissions">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 5v14"/>
               <path d="M5 12h14"/>
@@ -380,10 +380,12 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 import { ElMessage, ElMessageBox } from "element-plus";
 import {listarProductos, listarMaterialesAsignados, listarTrabajadores, asignarMaterial, listarMaterialesAsignadosTotal, ConsumirMaterialAsignado} from "../services/prestamoService"
 import { useAuthStore } from "../stores/auth";
+import dnis from "../utils/permissions";
+
 const auth = useAuthStore();
 
 const dniUsuario = ref(null);
@@ -433,12 +435,18 @@ onMounted(async()=> {
   }
 
   await loadProductos();
-  await loadTrabajadores();
+  await loadTrabajadores();  
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize);
 });
+
+const havePermissions = computed(() => {
+  console.log('dnis', dnis);
+  
+  return dnis.some(item=> item == dniUsuario.value);
+})
 
 const showModal = ref(false)
 const form = ref({ id: null, material: "", cantidad: 1, solicitante: "", fecha: "" })
@@ -456,16 +464,13 @@ function formatDate(date) {
 }
 
 const materialesAsignados = ref([]);
-const admins = [
-  '76370982'
-];
 
 const loadListaAsignados = async (page = 1) => {
   try {
     let response = null;
     currentPage.value = page;
     
-    if(admins.some(item=> item == dniUsuario.value)){
+    if(dnis.some(item=> item == dniUsuario.value)){
       console.log('es admin');
       
       response = await listarMaterialesAsignadosTotal();
