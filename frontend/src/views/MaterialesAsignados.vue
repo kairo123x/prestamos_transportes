@@ -34,7 +34,22 @@
           <span class="record-count">{{ materialesAsignados.length }} registros</span>
         </div>
         <div class="table-card-body">
+          <!-- Loading Skeleton -->
+          <div v-if="isLoading" class="loading-skeleton">
+            <div class="skeleton-row" v-for="n in 5" :key="n">
+              <div class="skeleton-cell skeleton-id"></div>
+              <div class="skeleton-cell skeleton-dni"></div>
+              <div class="skeleton-cell skeleton-tipo"></div>
+              <div class="skeleton-cell skeleton-codigo"></div>
+              <div class="skeleton-cell skeleton-desc"></div>
+              <div class="skeleton-cell skeleton-cantidad"></div>
+              <div class="skeleton-cell skeleton-fecha"></div>
+              <div class="skeleton-cell skeleton-acciones"></div>
+            </div>
+          </div>
+
           <el-table
+            v-else
             :data="materialesAsignados"
             style="width: 100%"
             :header-cell-style="{
@@ -425,6 +440,9 @@ const pageSize = ref(10);
 const totalItems = ref(0);
 const totalPages = ref(0);
 
+// Loading
+const isLoading = ref(false);
+
 onMounted(async()=> {
   window.addEventListener('resize', handleResize);
   dniUsuario.value = auth.currentUser.Dni
@@ -467,6 +485,7 @@ const materialesAsignados = ref([]);
 
 const loadListaAsignados = async (page = 1) => {
   try {
+    isLoading.value = true;
     let response = null;
     currentPage.value = page;
     
@@ -489,6 +508,8 @@ const loadListaAsignados = async (page = 1) => {
     }
   } catch (error) {
     console.log('Error en prestamos', error);
+  } finally {
+    isLoading.value = false;
   }
 }
 
@@ -1293,29 +1314,157 @@ const confirmarConsumoMaterial = async(item) => {
 .pagination-container {
   display: flex;
   justify-content: center;
-  padding: 20px;
-  border-top: 1px solid var(--color-gray-200);
+  padding: 24px 20px;
+  border-top: 2px solid var(--color-gray-200);
+  background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-white) 100%);
 }
 
 .pagination {
   color: var(--color-gray-700);
 }
 
-:deep(.pagination .el-pagination__item.active) {
-  background-color: var(--color-primary);
-  color: white;
+:deep(.el-pagination) {
+  font-weight: 600;
+  font-size: 14px;
 }
 
-:deep(.pagination .el-pagination__item:hover) {
+:deep(.el-pagination .el-pagination__total) {
+  font-weight: 600;
   color: var(--color-primary);
+  background: var(--color-gray-100);
+  padding: 8px 14px;
+  border-radius: 8px;
+  margin-right: 16px;
 }
 
-:deep(.pagination .btn-prev:hover,
-.pagination .btn-next:hover) {
+:deep(.el-pagination .el-pagination__sizes .el-input) {
+  width: 110px;
+}
+
+:deep(.el-pagination .el-pagination__sizes .el-input__wrapper) {
+  border-radius: 8px;
+  padding: 4px 12px;
+  box-shadow: none;
+  border: 2px solid var(--color-gray-200);
+}
+
+:deep(.el-pagination .el-pager li) {
+  min-width: 36px;
+  height: 36px;
+  line-height: 36px;
+  border-radius: 8px;
+  margin: 0 4px;
+  font-weight: 600;
+  background: var(--color-white);
+  border: 2px solid var(--color-gray-200);
+}
+
+:deep(.el-pagination .el-pager li:hover) {
   color: var(--color-primary);
+  border-color: var(--color-accent);
 }
 
-:deep(.pagination .el-pagination__sizes) {
-  margin: 0 10px;
+:deep(.el-pagination .el-pager li.is-active) {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
+  color: var(--color-primary);
+  border-color: var(--color-accent);
+  font-weight: 700;
+}
+
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next) {
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--color-white);
+  border: 2px solid var(--color-gray-200);
+  margin: 0 4px;
+}
+
+:deep(.el-pagination .btn-prev:hover),
+:deep(.el-pagination .btn-next:hover) {
+  color: var(--color-primary);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+:deep(.el-pagination .el-pagination__jump) {
+  margin-left: 16px;
+  font-weight: 500;
+}
+
+:deep(.el-pagination .el-pagination__jump .el-input__wrapper) {
+  border-radius: 8px;
+  padding: 4px 8px;
+  box-shadow: none;
+  border: 2px solid var(--color-gray-200);
+  width: 60px;
+}
+
+/* ===== Loading Skeleton ===== */
+.loading-skeleton {
+  padding: 20px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.skeleton-row:last-child {
+  border-bottom: none;
+}
+
+.skeleton-cell {
+  height: 20px;
+  background: linear-gradient(90deg, var(--color-gray-200) 25%, var(--color-gray-100) 50%, var(--color-gray-200) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite ease-in-out;
+  border-radius: 6px;
+}
+
+.skeleton-id {
+  width: 60px;
+}
+
+.skeleton-dni {
+  width: 100px;
+}
+
+.skeleton-tipo {
+  width: 80px;
+}
+
+.skeleton-codigo {
+  width: 120px;
+}
+
+.skeleton-desc {
+  flex: 1;
+  min-width: 150px;
+}
+
+.skeleton-cantidad {
+  width: 70px;
+}
+
+.skeleton-fecha {
+  width: 100px;
+}
+
+.skeleton-acciones {
+  width: 100px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 </style>
